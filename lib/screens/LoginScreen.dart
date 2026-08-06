@@ -1,5 +1,8 @@
+import 'package:cinetrack_process/screens/HomeScreen.dart';
 import 'package:flutter/material.dart';
+import 'RegisterScreen.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:cinetrack_process/screens/HomeScreen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -81,16 +84,20 @@ class _LoginscreenState extends State<LoginScreen> {
                   const SizedBox(height: 24),
                   TextField(
                     controller: emailController,
-                    style: GoogleFonts.sora(color: Colors.black87),
+                    style: GoogleFonts.sora(color: Colors.white),
                     decoration: InputDecoration(
                       hintText: 'E-posta Adresi',
-                      hintStyle: GoogleFonts.sora(color: Colors.grey),
-                      prefixIcon: const Icon(Icons.email_outlined, color: Colors.grey),
+                      hintStyle: GoogleFonts.sora(color: Colors.white38),
+                      prefixIcon: const Icon(Icons.email_outlined, color: Colors.white54),
                       filled: true,
-                      fillColor: Colors.white,
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(30),
-                        borderSide: BorderSide.none,
+                      fillColor: Colors.white.withOpacity(0.05),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: const BorderSide(color: Colors.white24),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: const BorderSide(color: Color(0xFF7C4DFF)),
                       ),
                     ),
                   ),
@@ -98,15 +105,15 @@ class _LoginscreenState extends State<LoginScreen> {
                   TextField(
                     controller: passwordController,
                     obscureText: !isPasswordVisible,
-                    style: GoogleFonts.sora(color: Colors.black87),
+                    style: GoogleFonts.sora(color: Colors.white),
                     decoration: InputDecoration(
                       hintText: 'Şifre',
-                      hintStyle: GoogleFonts.sora(color: Colors.grey),
-                      prefixIcon: const Icon(Icons.lock_outline, color: Colors.grey),
+                      hintStyle: GoogleFonts.sora(color: Colors.white38),
+                      prefixIcon: const Icon(Icons.lock_outline, color: Colors.white54),
                       suffixIcon: IconButton(
                         icon: Icon(
                           isPasswordVisible ? Icons.visibility_off : Icons.visibility,
-                          color: Colors.grey,
+                          color: Colors.white54,
                         ),
                         onPressed: () {
                           setState(() {
@@ -115,10 +122,14 @@ class _LoginscreenState extends State<LoginScreen> {
                         },
                       ),
                       filled: true,
-                      fillColor: Colors.white,
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(30),
-                        borderSide: BorderSide.none,
+                      fillColor: Colors.white.withOpacity(0.05),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: const BorderSide(color: Colors.white24),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: const BorderSide(color: Color(0xFF7C4DFF)),
                       ),
                     ),
                   ),
@@ -161,7 +172,12 @@ class _LoginscreenState extends State<LoginScreen> {
                     width: double.infinity,
                     height: 50,
                     child: ElevatedButton(
-                      onPressed: () {},
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => const HomeScreen()),
+                        );
+                      },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFF7C4DFF),
                         shape: RoundedRectangleBorder(
@@ -208,7 +224,12 @@ class _LoginscreenState extends State<LoginScreen> {
                         style: GoogleFonts.sora(color: Colors.white54, fontSize: 13),
                       ),
                       TextButton(
-                        onPressed: () {},
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (context) => const RegisterScreen()),
+                          );
+                        },
                         style: TextButton.styleFrom(padding: EdgeInsets.zero),
                         child: Text(
                           'Yeni Hesap Oluştur',
