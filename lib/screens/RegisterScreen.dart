@@ -70,7 +70,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             style: GoogleFonts.sora(color: Colors.white54, fontSize: 14),
                           ),
                           const SizedBox(height: 24),
-
+                          
                           // Ad Soyad
                           _buildLabel('AD SOYAD'),
                           const SizedBox(height: 6),
