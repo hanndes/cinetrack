@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'RegisterScreen.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../services/AuthService.dart';
-import '../services/CurrentUser.dart';
+import '../services/current_user.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});

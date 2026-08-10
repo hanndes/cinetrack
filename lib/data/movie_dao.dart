@@ -1,5 +1,5 @@
 import '../models/movie.dart';
-import 'DatabaseHelper.dart';
+import 'database_helper.dart';
 
 class MovieDao {
   final dbHelper = DatabaseHelper.instance;

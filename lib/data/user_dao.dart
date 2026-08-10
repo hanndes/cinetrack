@@ -1,6 +1,6 @@
 import 'package:bcrypt/bcrypt.dart';
 import '../models/user.dart';
-import 'DatabaseHelper.dart';
+import 'database_helper.dart';
 
 class UserDao {
   final dbHelper = DatabaseHelper.instance;

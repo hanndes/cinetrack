@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import '../services/CurrentUser.dart';
+import '../services/current_user.dart';
 
 class ProfileContent extends StatelessWidget {
   const ProfileContent({super.key});
