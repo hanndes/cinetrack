@@ -68,5 +68,29 @@ class DatabaseHelper {
         FOREIGN KEY (movieId) REFERENCES movies (id)
       )
     ''');
+
+    await db.execute('''
+      CREATE TABLE watched (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        userId INTEGER NOT NULL,
+        movieId INTEGER NOT NULL,
+        watchedDate TEXT,
+        FOREIGN KEY (userId) REFERENCES users (id),
+        FOREIGN KEY (movieId) REFERENCES movies (id)
+      )
+    ''');
+
+    await db.execute('''
+      CREATE TABLE reviews (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        userId INTEGER NOT NULL,
+        movieId INTEGER NOT NULL,
+        rating REAL NOT NULL,
+        reviewText TEXT,
+        reviewDate TEXT,
+        FOREIGN KEY (userId) REFERENCES users (id),
+        FOREIGN KEY (movieId) REFERENCES movies (id)
+      )
+    ''');
   }
 }
