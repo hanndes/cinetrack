@@ -16,11 +16,11 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   int selectedIndex = 0;
 
-  final List<Widget> _screens = const [
-    HomeContent(),
-    SearchContent(),
-    WatchlistContent(),
-    ProfileContent(),
+  List<Widget> get _screens => [
+    const HomeContent(),
+    const SearchContent(),
+    WatchlistContent(key: UniqueKey()),
+    const ProfileContent(),
   ];
 
   @override

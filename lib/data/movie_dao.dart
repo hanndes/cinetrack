@@ -37,4 +37,14 @@ class MovieDao {
     final result = await db.query('movies', limit: 1);
     return result.isEmpty;
   }
+
+  // Veritabanı boşsa dummy filmleri ekle
+  Future<void> seedMoviesIfEmpty(List<Movie> movies) async {
+    final empty = await isEmpty();
+    if (empty) {
+      for (final movie in movies) {
+        await insertMovie(movie);
+      }
+    }
+  }
 }

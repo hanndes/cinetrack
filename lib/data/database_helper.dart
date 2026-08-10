@@ -92,5 +92,25 @@ class DatabaseHelper {
         FOREIGN KEY (movieId) REFERENCES movies (id)
       )
     ''');
+
+  await db.execute('''
+      CREATE TABLE lists (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        userId INTEGER NOT NULL,
+        name TEXT NOT NULL,
+        createdDate TEXT,
+        FOREIGN KEY (userId) REFERENCES users (id)
+      )
+    ''');
+
+  await db.execute('''
+      CREATE TABLE list_items (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        listId INTEGER NOT NULL,
+        movieId INTEGER NOT NULL,
+        FOREIGN KEY (listId) REFERENCES lists (id),
+        FOREIGN KEY (movieId) REFERENCES movies (id)
+      )
+    ''');
   }
 }

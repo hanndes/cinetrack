@@ -1,6 +1,11 @@
 import 'package:cinetrack_process/screens/LoginScreen.dart';
 import 'package:flutter/material.dart';
-void main() {
+import 'data/movie_dao.dart';
+import 'data/movie_data.dart';
+
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await MovieDao().seedMoviesIfEmpty(dummyMovies);
   runApp(const MyApp());
 }
 

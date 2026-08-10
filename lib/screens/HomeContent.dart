@@ -4,6 +4,7 @@ import '../models/movie.dart';
 import '../services/current_user.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class HomeContent extends StatefulWidget {
   const HomeContent({super.key});
@@ -15,6 +16,14 @@ class HomeContent extends StatefulWidget {
 class _HomeContentState extends State<HomeContent> {
   final MovieDao _movieDao = MovieDao();
   final WatchlistDao _watchlistDao = WatchlistDao();
+
+  Future<void> _openTrailer(String movieTitle) async {
+    final query = Uri.encodeComponent('$movieTitle trailer');
+    final url = Uri.parse('https://www.youtube.com/results?search_query=$query');
+    if (await canLaunchUrl(url)) {
+      await launchUrl(url, mode: LaunchMode.externalApplication);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -121,7 +130,7 @@ class _HomeContentState extends State<HomeContent> {
                 child: Row(
                   children: [
                     ElevatedButton(
-                      onPressed: () {},
+                      onPressed: () => _openTrailer(movies[0].title),
                       style: ElevatedButton.styleFrom(
                         elevation: 0,
                         backgroundColor: const Color(0xFF7C4DFF),

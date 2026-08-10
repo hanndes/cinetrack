@@ -1,9 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../data/list_dao.dart';
 import '../services/current_user.dart';
 
-class ProfileContent extends StatelessWidget {
+class ProfileContent extends StatefulWidget {
   const ProfileContent({super.key});
+
+  @override
+  State<ProfileContent> createState() => _ProfileContentState();
+}
+
+class _ProfileContentState extends State<ProfileContent> {
+  final ListDao _listDao = ListDao();
 
   @override
   Widget build(BuildContext context) {
@@ -62,15 +70,23 @@ class ProfileContent extends StatelessWidget {
             style: GoogleFonts.manrope(color: Colors.white70, fontSize: 15),
           ),
           const SizedBox(height: 20),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              _buildStat('342', 'WATCHED', const Color(0xFF7C4DFF)),
-              _buildDivider(),
-              _buildStat('87', 'REVIEWS', const Color(0xFF00DCE5)),
-              _buildDivider(),
-              _buildStat('12', 'LISTS', const Color(0xFFFFDB3C)),
-            ],
+          FutureBuilder<int>(
+            future: CurrentUser.instance.user?.id != null
+                ? _listDao.getListCount(CurrentUser.instance.user!.id!)
+                : Future.value(0),
+            builder: (context, snapshot) {
+              final listCount = snapshot.data ?? 0;
+              return Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  _buildStat('342', 'WATCHED', const Color(0xFF7C4DFF)),
+                  _buildDivider(),
+                  _buildStat('87', 'REVIEWS', const Color(0xFF00DCE5)),
+                  _buildDivider(),
+                  _buildStat(listCount.toString(), 'LISTS', const Color(0xFFFFDB3C)),
+                ],
+              );
+            },
           ),
           const SizedBox(height: 32),
           Padding(
@@ -156,7 +172,6 @@ class ProfileContent extends StatelessWidget {
   }
 }
 
-
 Widget _buildStat(String value, String label, Color color) {
   return Column(
     children: [
@@ -181,6 +196,7 @@ Widget _buildDivider() {
     color: Colors.white24,
   );
 }
+
 Widget _buildSettingsTile({
   required IconData icon,
   required Color iconColor,
