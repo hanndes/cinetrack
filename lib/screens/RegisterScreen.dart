@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import '../services/AuthService.dart';
+
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
 
@@ -9,6 +11,9 @@ class RegisterScreen extends StatefulWidget {
 }
 
 class _RegisterScreenState extends State<RegisterScreen> {
+
+  final AuthService _authService = AuthService();
+  bool _isLoading = false;
 
   final TextEditingController nameController = TextEditingController();
   final TextEditingController emailController = TextEditingController();
@@ -70,7 +75,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             style: GoogleFonts.sora(color: Colors.white54, fontSize: 14),
                           ),
                           const SizedBox(height: 24),
-                          
+
                           // Ad Soyad
                           _buildLabel('AD SOYAD'),
                           const SizedBox(height: 6),
@@ -157,8 +162,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             width: double.infinity,
                             height: 52,
                             child: ElevatedButton(
-                              onPressed: () {
-                                if (passwordController.text != confirmPasswordController.text) {
+                              onPressed: _isLoading
+                                  ? null
+                                  : () async {
+                                if (passwordController.text !=
+                                    confirmPasswordController.text) {
                                   ScaffoldMessenger.of(context).showSnackBar(
                                     const SnackBar(
                                       content: Text('Şifreler eşleşmiyor'),
@@ -167,6 +175,39 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                   );
                                   return;
                                 }
+
+                                setState(() {
+                                  _isLoading = true;
+                                });
+
+                                final error = await _authService.register(
+                                  nameController.text,
+                                  emailController.text,
+                                  passwordController.text,
+                                );
+
+                                if (!mounted) return;
+
+                                setState(() {
+                                  _isLoading = false;
+                                });
+
+                                if (error != null) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text(error),
+                                      backgroundColor: Colors.redAccent,
+                                    ),
+                                  );
+                                } else {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                      content: Text('Kayıt başarılı! Giriş yapabilirsiniz.'),
+                                      backgroundColor: Colors.green,
+                                    ),
+                                  );
+                                  Navigator.pop(context);
+                                }
                               },
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: const Color(0xFF7C4DFF),
@@ -174,7 +215,16 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                   borderRadius: BorderRadius.circular(12),
                                 ),
                               ),
-                              child: Text(
+                              child: _isLoading
+                                  ? const SizedBox(
+                                width: 22,
+                                height: 22,
+                                child: CircularProgressIndicator(
+                                  color: Colors.white,
+                                  strokeWidth: 2.5,
+                                ),
+                              )
+                                  : Text(
                                 'Kayıt Ol',
                                 style: GoogleFonts.sora(
                                   color: Colors.white,

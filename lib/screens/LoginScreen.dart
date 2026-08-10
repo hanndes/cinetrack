@@ -2,7 +2,7 @@ import 'package:cinetrack_process/screens/HomeScreen.dart';
 import 'package:flutter/material.dart';
 import 'RegisterScreen.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:cinetrack_process/screens/HomeScreen.dart';
+import '../services/AuthService.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -12,6 +12,9 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginscreenState extends State<LoginScreen> {
+
+  final AuthService _authService = AuthService();
+  bool _isLoading = false;
 
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
@@ -172,11 +175,37 @@ class _LoginscreenState extends State<LoginScreen> {
                     width: double.infinity,
                     height: 50,
                     child: ElevatedButton(
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (context) => const HomeScreen()),
+                      onPressed: _isLoading
+                          ? null
+                          : () async {
+                        setState(() {
+                          _isLoading = true;
+                        });
+
+                        final user = await _authService.login(
+                          emailController.text,
+                          passwordController.text,
                         );
+
+                        if (!mounted) return;
+
+                        setState(() {
+                          _isLoading = false;
+                        });
+
+                        if (user != null) {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (context) => const HomeScreen()),
+                          );
+                        } else {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('E-posta veya şifre hatalı'),
+                              backgroundColor: Colors.redAccent,
+                            ),
+                          );
+                        }
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFF7C4DFF),
@@ -184,7 +213,16 @@ class _LoginscreenState extends State<LoginScreen> {
                           borderRadius: BorderRadius.circular(12),
                         ),
                       ),
-                      child: Row(
+                      child: _isLoading
+                          ? const SizedBox(
+                        width: 22,
+                        height: 22,
+                        child: CircularProgressIndicator(
+                          color: Colors.white,
+                          strokeWidth: 2.5,
+                        ),
+                      )
+                          : Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Text(

@@ -3,6 +3,8 @@ import 'package:google_fonts/google_fonts.dart';
 
 import 'HomeContent.dart';
 import 'ProfileContent.dart';
+import 'WatchlistContent.dart';
+import 'SearchContent.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -16,8 +18,8 @@ class _HomeScreenState extends State<HomeScreen> {
 
   final List<Widget> _screens = const [
     HomeContent(),
-    Center(child: Text('Search', style: TextStyle(color: Colors.white))),
-    Center(child: Text('Watchlist', style: TextStyle(color: Colors.white))),
+    SearchContent(),
+    WatchlistContent(),
     ProfileContent(),
   ];
 
