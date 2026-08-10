@@ -45,7 +45,43 @@ class DatabaseHelper {
         badge TEXT,
         durationMinutes INTEGER,
         releaseYear INTEGER,
-        genres TEXT
+        plot TEXT
+      )
+    ''');
+
+    await db.execute('''
+      CREATE TABLE genres (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT NOT NULL UNIQUE
+      )
+    ''');
+
+    await db.execute('''
+      CREATE TABLE movie_genres (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        movieId INTEGER NOT NULL,
+        genreId INTEGER NOT NULL,
+        FOREIGN KEY (movieId) REFERENCES movies (id),
+        FOREIGN KEY (genreId) REFERENCES genres (id)
+      )
+    ''');
+
+    await db.execute('''
+      CREATE TABLE artists (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT NOT NULL,
+        photoUrl TEXT
+      )
+    ''');
+
+    await db.execute('''
+      CREATE TABLE movie_cast (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        movieId INTEGER NOT NULL,
+        artistId INTEGER NOT NULL,
+        role TEXT,
+        FOREIGN KEY (movieId) REFERENCES movies (id),
+        FOREIGN KEY (artistId) REFERENCES artists (id)
       )
     ''');
 
@@ -93,7 +129,7 @@ class DatabaseHelper {
       )
     ''');
 
-  await db.execute('''
+    await db.execute('''
       CREATE TABLE lists (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         userId INTEGER NOT NULL,
@@ -103,7 +139,7 @@ class DatabaseHelper {
       )
     ''');
 
-  await db.execute('''
+    await db.execute('''
       CREATE TABLE list_items (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         listId INTEGER NOT NULL,

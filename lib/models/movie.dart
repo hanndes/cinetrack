@@ -7,6 +7,7 @@ class Movie {
   final String? badge;
   final int durationMinutes;
   final int releaseYear;
+  final String? plot;
   final List<String> cast;
   final List<String> genres;
 
@@ -19,8 +20,9 @@ class Movie {
     this.badge,
     required this.durationMinutes,
     required this.releaseYear,
-    required this.cast,
-    required this.genres,
+    this.plot,
+    this.cast = const [],
+    this.genres = const [],
   });
 
   Map<String, dynamic> toMap() {
@@ -33,11 +35,11 @@ class Movie {
       'badge': badge,
       'durationMinutes': durationMinutes,
       'releaseYear': releaseYear,
-      'genres': genres.join(','),
+      'plot': plot,
     };
   }
 
-  factory Movie.fromMap(Map<String, dynamic> map) {
+  factory Movie.fromMap(Map<String, dynamic> map, {List<String>? genres, List<String>? cast}) {
     return Movie(
       id: map['id'],
       title: map['title'],
@@ -47,8 +49,9 @@ class Movie {
       badge: map['badge'],
       durationMinutes: map['durationMinutes'],
       releaseYear: map['releaseYear'],
-      genres: (map['genres'] as String).split(','),
-      cast: const [],
+      plot: map['plot'],
+      genres: genres ?? const [],
+      cast: cast ?? const [],
     );
   }
 }

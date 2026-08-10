@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../data/list_dao.dart';
 import '../services/current_user.dart';
+import 'LoginScreen.dart';
 
 class ProfileContent extends StatefulWidget {
   const ProfileContent({super.key});
@@ -142,27 +143,37 @@ class _ProfileContentState extends State<ProfileContent> {
             ),
           ),
           const SizedBox(height: 24),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 14),
-            decoration: BoxDecoration(
-              color: Colors.redAccent.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(30),
-              border: Border.all(color: Colors.redAccent.withOpacity(0.3)),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(Icons.logout, color: Colors.redAccent.shade100, size: 18),
-                const SizedBox(width: 8),
-                Text(
-                  'LOG OUT',
-                  style: GoogleFonts.jetBrainsMono(
-                    color: Colors.redAccent.shade100,
-                    fontSize: 12,
-                    letterSpacing: 1,
+          GestureDetector(
+            onTap: () {
+              CurrentUser.instance.clear();
+              Navigator.pushAndRemoveUntil(
+                context,
+                MaterialPageRoute(builder: (context) => const LoginScreen()),
+                    (route) => false,
+              );
+            },
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 14),
+              decoration: BoxDecoration(
+                color: Colors.redAccent.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(30),
+                border: Border.all(color: Colors.redAccent.withOpacity(0.3)),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.logout, color: Colors.redAccent.shade100, size: 18),
+                  const SizedBox(width: 8),
+                  Text(
+                    'LOG OUT',
+                    style: GoogleFonts.jetBrainsMono(
+                      color: Colors.redAccent.shade100,
+                      fontSize: 12,
+                      letterSpacing: 1,
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
           const SizedBox(height: 32),
