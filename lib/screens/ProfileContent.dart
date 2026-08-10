@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../services/CurrentUser.dart';
 
 class ProfileContent extends StatelessWidget {
   const ProfileContent({super.key});
@@ -52,12 +53,12 @@ class ProfileContent extends StatelessWidget {
           ),
           const SizedBox(height: 16),
           Text(
-            'Alex Vance',
+            CurrentUser.instance.user?.name ?? 'Misafir',
             style: GoogleFonts.sora(color: Colors.white, fontSize: 26, fontWeight: FontWeight.w800),
           ),
           const SizedBox(height: 4),
           Text(
-            'Cinephile & Noir Enthusiast',
+            CurrentUser.instance.user?.email ?? '',
             style: GoogleFonts.manrope(color: Colors.white70, fontSize: 15),
           ),
           const SizedBox(height: 20),

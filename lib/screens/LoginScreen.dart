@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'RegisterScreen.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../services/AuthService.dart';
+import '../services/CurrentUser.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -194,6 +195,7 @@ class _LoginscreenState extends State<LoginScreen> {
                         });
 
                         if (user != null) {
+                          CurrentUser.instance.setUser(user);
                           Navigator.push(
                             context,
                             MaterialPageRoute(builder: (context) => const HomeScreen()),
