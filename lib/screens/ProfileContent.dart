@@ -6,6 +6,8 @@ import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as p;
 import '../data/list_dao.dart';
 import '../data/user_dao.dart';
+import '../data/review_dao.dart';
+import '../data/watched_dao.dart';
 import '../services/current_user.dart';
 import 'LoginScreen.dart';
 import 'AccountScreen.dart';
@@ -20,6 +22,8 @@ class ProfileContent extends StatefulWidget {
 class _ProfileContentState extends State<ProfileContent> {
   final ListDao _listDao = ListDao();
   final UserDao _userDao = UserDao();
+  final ReviewDao _reviewDao = ReviewDao();
+  final WatchedDao _watchedDao = WatchedDao();
 
   Future<void> _pickImage() async {
     final ImagePicker picker = ImagePicker();
@@ -120,20 +124,24 @@ class _ProfileContentState extends State<ProfileContent> {
             style: GoogleFonts.manrope(color: Colors.white70, fontSize: 15),
           ),
           const SizedBox(height: 20),
-          FutureBuilder<int>(
+          FutureBuilder<List<int>>(
             future: CurrentUser.instance.user?.id != null
-                ? _listDao.getListCount(CurrentUser.instance.user!.id!)
-                : Future.value(0),
+                ? Future.wait([
+              _watchedDao.getWatchedCount(CurrentUser.instance.user!.id!),
+              _reviewDao.getReviewCountForUser(CurrentUser.instance.user!.id!),
+              _listDao.getListCount(CurrentUser.instance.user!.id!),
+            ])
+                : Future.value([0, 0, 0]),
             builder: (context, snapshot) {
-              final listCount = snapshot.data ?? 0;
+              final counts = snapshot.data ?? [0, 0, 0];
               return Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  _buildStat('342', 'WATCHED', const Color(0xFF7C4DFF)),
+                  _buildStat(counts[0].toString(), 'WATCHED', const Color(0xFF7C4DFF)),
                   _buildDivider(),
-                  _buildStat('87', 'REVIEWS', const Color(0xFF00DCE5)),
+                  _buildStat(counts[1].toString(), 'REVIEWS', const Color(0xFF00DCE5)),
                   _buildDivider(),
-                  _buildStat(listCount.toString(), 'LISTS', const Color(0xFFFFDB3C)),
+                  _buildStat(counts[2].toString(), 'LISTS', const Color(0xFFFFDB3C)),
                 ],
               );
             },

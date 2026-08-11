@@ -6,6 +6,7 @@ import '../models/movie_list.dart';
 import '../data/review_dao.dart';
 import '../data/list_dao.dart';
 import '../data/watchlist_dao.dart';
+import '../data/watched_dao.dart';
 import '../services/current_user.dart';
 
 class MovieDetailScreen extends StatefulWidget {
@@ -21,11 +22,13 @@ class _MovieDetailScreenState extends State<MovieDetailScreen> {
   final ReviewDao _reviewDao = ReviewDao();
   final ListDao _listDao = ListDao();
   final WatchlistDao _watchlistDao = WatchlistDao();
+  final WatchedDao _watchedDao = WatchedDao();
   final TextEditingController _reviewController = TextEditingController();
 
   double _selectedRating = 5;
   bool _isSubmitting = false;
   bool _isInWatchlist = false;
+  bool _isWatched = false;
   int? _editingReviewId;
   late Future<List<Review>> _reviewsFuture;
 
@@ -34,6 +37,7 @@ class _MovieDetailScreenState extends State<MovieDetailScreen> {
     super.initState();
     _reviewsFuture = _loadReviews();
     _loadWatchlistStatus();
+    _loadWatchedStatus();
   }
 
   Future<void> _loadWatchlistStatus() async {
@@ -41,6 +45,29 @@ class _MovieDetailScreenState extends State<MovieDetailScreen> {
     if (user?.id == null) return;
     final result = await _watchlistDao.isInWatchlist(user!.id!, widget.movie.id!);
     if (mounted) setState(() => _isInWatchlist = result);
+  }
+
+  Future<void> _loadWatchedStatus() async {
+    final user = CurrentUser.instance.user;
+    if (user?.id == null) return;
+    final result = await _watchedDao.isWatched(user!.id!, widget.movie.id!);
+    if (mounted) setState(() => _isWatched = result);
+  }
+
+  Future<void> _toggleWatched() async {
+    final user = CurrentUser.instance.user;
+    if (user?.id == null) return;
+
+    final userId = user!.id!;
+    final movieId = widget.movie.id!;
+
+    if (_isWatched) {
+      await _watchedDao.unmarkAsWatched(userId, movieId);
+    } else {
+      await _watchedDao.markAsWatched(userId, movieId);
+    }
+
+    setState(() => _isWatched = !_isWatched);
   }
 
   Future<void> _toggleWatchlist() async {
@@ -379,6 +406,23 @@ class _MovieDetailScreenState extends State<MovieDetailScreen> {
                         child: Text(
                           movie.title,
                           style: GoogleFonts.sora(color: Colors.white, fontSize: 26, fontWeight: FontWeight.w800),
+                        ),
+                      ),
+                      GestureDetector(
+                        onTap: _toggleWatched,
+                        child: Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: _isWatched
+                                ? Colors.greenAccent.withOpacity(0.15)
+                                : const Color(0xFF7C4DFF).withOpacity(0.15),
+                            shape: BoxShape.circle,
+                          ),
+                          child: Icon(
+                            _isWatched ? Icons.check_circle : Icons.check_circle_outline,
+                            color: _isWatched ? Colors.greenAccent : const Color(0xFF7C4DFF),
+                            size: 22,
+                          ),
                         ),
                       ),
                       GestureDetector(
