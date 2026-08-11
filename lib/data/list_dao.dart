@@ -72,4 +72,17 @@ class ListDao {
     await db.delete('list_items', where: 'listId = ?', whereArgs: [listId]);
     await db.delete('lists', where: 'id = ?', whereArgs: [listId]);
   }
+
+  // Bir filmin, kullanıcının hangi listelerinde olduğunu getir
+  // (Listeye Ekle bottom sheet'inde hangi checkbox'ların işaretli
+  // gösterileceğini belirlemek için kullanılır)
+  Future<Set<int>> getListIdsContainingMovie(int userId, int movieId) async {
+    final db = await dbHelper.database;
+    final maps = await db.rawQuery('''
+      SELECT lists.id FROM lists
+      INNER JOIN list_items ON lists.id = list_items.listId
+      WHERE lists.userId = ? AND list_items.movieId = ?
+    ''', [userId, movieId]);
+    return maps.map((map) => map['id'] as int).toSet();
+  }
 }

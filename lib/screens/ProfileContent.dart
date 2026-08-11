@@ -1,6 +1,11 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:path/path.dart' as p;
 import '../data/list_dao.dart';
+import '../data/user_dao.dart';
 import '../services/current_user.dart';
 import 'LoginScreen.dart';
 
@@ -13,9 +18,44 @@ class ProfileContent extends StatefulWidget {
 
 class _ProfileContentState extends State<ProfileContent> {
   final ListDao _listDao = ListDao();
+  final UserDao _userDao = UserDao();
+
+  Future<void> _pickImage() async {
+    final ImagePicker picker = ImagePicker();
+    final XFile? pickedFile = await picker.pickImage(
+      source: ImageSource.gallery,
+      imageQuality: 80,
+    );
+
+    if (pickedFile == null) return;
+
+    final user = CurrentUser.instance.user;
+    if (user?.id == null) return;
+
+    // image_picker geçici cache klasörüne kaydediyor, cihaz bu klasörü
+    // istediği zaman temizleyebilir. Bu yüzden dosyayı uygulamanın
+    // kalıcı belgeler klasörüne kendimiz kopyalıyoruz.
+    final appDir = await getApplicationDocumentsDirectory();
+    final fileName = 'profile_${user!.id}${p.extension(pickedFile.path)}';
+    final savedImage = await File(pickedFile.path).copy(
+      p.join(appDir.path, fileName),
+    );
+
+    // Veritabanına kalıcı yolu yaz
+    await _userDao.updateProfileImage(user.id!, savedImage.path);
+
+    // CurrentUser'daki user objesini de güncelle ki uygulama genelinde
+    // güncel görsel kullanılsın
+    CurrentUser.instance.setUser(user.copyWith(profileImageUrl: savedImage.path));
+
+    setState(() {});
+  }
 
   @override
   Widget build(BuildContext context) {
+    final imagePath = CurrentUser.instance.user?.profileImageUrl;
+    final hasLocalImage = imagePath != null && File(imagePath).existsSync();
+
     return SingleChildScrollView(
       child: Column(
         children: [
@@ -38,7 +78,12 @@ class _ProfileContentState extends State<ProfileContent> {
                     ],
                   ),
                   child: ClipOval(
-                    child: Image.network(
+                    child: hasLocalImage
+                        ? Image.file(
+                      File(imagePath),
+                      fit: BoxFit.cover,
+                    )
+                        : Image.network(
                       'https://lh3.googleusercontent.com/aida-public/AB6AXuBcw_2ZcWdUXREuzusR9UBLTTbyXJvqKaSEwNAbarTC_GVdw--VFuOvTo0Vpu2R5MKMUc9eg5GKn-Mx12stQ2JWXgBadG-q7Y8YWzbtaEfx6u-0P9_JtPNKXxOn61JsilLhnkfQKHx9IE4msmC6PCayx0HtsBWPjdzj-2RpT58VgZyatGkPeYg4WjUzJS-ydYB85tgY8-ciI7pXWkxti05-IEbTXaYUZIPQQ7L237l7XSUw3lgYBzJN',
                       fit: BoxFit.cover,
                     ),
@@ -47,14 +92,17 @@ class _ProfileContentState extends State<ProfileContent> {
                 Positioned(
                   bottom: 0,
                   right: 0,
-                  child: Container(
-                    width: 36,
-                    height: 36,
-                    decoration: const BoxDecoration(
-                      color: Color(0xFF7C4DFF),
-                      shape: BoxShape.circle,
+                  child: GestureDetector(
+                    onTap: _pickImage,
+                    child: Container(
+                      width: 36,
+                      height: 36,
+                      decoration: const BoxDecoration(
+                        color: Color(0xFF7C4DFF),
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(Icons.edit, color: Colors.white, size: 18),
                     ),
-                    child: const Icon(Icons.edit, color: Colors.white, size: 18),
                   ),
                 ),
               ],

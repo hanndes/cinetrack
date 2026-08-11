@@ -13,6 +13,22 @@ class User {
     this.profileImageUrl,
   });
 
+  User copyWith({
+    int? id,
+    String? name,
+    String? email,
+    String? passwordHash,
+    String? profileImageUrl,
+  }) {
+    return User(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      email: email ?? this.email,
+      passwordHash: passwordHash ?? this.passwordHash,
+      profileImageUrl: profileImageUrl ?? this.profileImageUrl,
+    );
+  }
+
   Map<String, dynamic> toMap() {
     return {
       'id': id,

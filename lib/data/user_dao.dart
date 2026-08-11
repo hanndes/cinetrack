@@ -59,4 +59,16 @@ class UserDao {
       return null; // Şifre yanlış
     }
   }
+
+  // Profil fotoğrafı yolunu güncelle
+  Future<void> updateProfileImage(int userId, String imagePath) async {
+    final db = await dbHelper.database;
+
+    await db.update(
+      'users',
+      {'profileImageUrl': imagePath},
+      where: 'id = ?',
+      whereArgs: [userId],
+    );
+  }
 }
