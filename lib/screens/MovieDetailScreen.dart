@@ -26,6 +26,7 @@ class _MovieDetailScreenState extends State<MovieDetailScreen> {
   double _selectedRating = 5;
   bool _isSubmitting = false;
   bool _isInWatchlist = false;
+  int? _editingReviewId;
   late Future<List<Review>> _reviewsFuture;
 
   @override
@@ -78,18 +79,92 @@ class _MovieDetailScreenState extends State<MovieDetailScreen> {
 
     setState(() => _isSubmitting = true);
 
-    await _reviewDao.addReview(
-      user!.id!,
-      widget.movie.id!,
-      _selectedRating,
-      _reviewController.text.trim(),
-    );
+    if (_editingReviewId != null) {
+      await _reviewDao.updateReview(
+        _editingReviewId!,
+        user!.id!,
+        _selectedRating,
+        _reviewController.text.trim(),
+      );
+    } else {
+      await _reviewDao.addReview(
+        user!.id!,
+        widget.movie.id!,
+        _selectedRating,
+        _reviewController.text.trim(),
+      );
+    }
 
     _reviewController.clear();
 
     setState(() {
       _selectedRating = 5;
       _isSubmitting = false;
+      _editingReviewId = null;
+      _reviewsFuture = _loadReviews();
+    });
+  }
+
+  void _startEditingReview(Review review) {
+    setState(() {
+      _editingReviewId = review.id;
+      _selectedRating = review.rating;
+      _reviewController.text = review.reviewText ?? '';
+    });
+  }
+
+  void _cancelEditing() {
+    setState(() {
+      _editingReviewId = null;
+      _selectedRating = 5;
+      _reviewController.clear();
+    });
+  }
+
+  Future<void> _confirmDeleteReview(Review review) async {
+    final user = CurrentUser.instance.user;
+    if (user?.id == null) return;
+
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) {
+        return AlertDialog(
+          backgroundColor: const Color(0xFF1E1730),
+          title: Text(
+            'Yorumu Sil',
+            style: GoogleFonts.sora(color: Colors.white, fontWeight: FontWeight.w700),
+          ),
+          content: Text(
+            'Bu yorumu silmek istediğine emin misin?',
+            style: GoogleFonts.manrope(color: Colors.white70, fontSize: 14),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(dialogContext, false),
+              child: Text('İptal', style: GoogleFonts.manrope(color: Colors.white54)),
+            ),
+            TextButton(
+              onPressed: () => Navigator.pop(dialogContext, true),
+              child: Text(
+                'Sil',
+                style: GoogleFonts.manrope(color: Colors.redAccent, fontWeight: FontWeight.w700),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (confirmed != true) return;
+
+    await _reviewDao.deleteReview(review.id!, user!.id!);
+
+    // Eğer silinen yorum düzenleme modundaysa formu da temizle
+    if (_editingReviewId == review.id) {
+      _cancelEditing();
+    }
+
+    setState(() {
       _reviewsFuture = _loadReviews();
     });
   }
@@ -419,6 +494,28 @@ class _MovieDetailScreenState extends State<MovieDetailScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          if (_editingReviewId != null)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 12),
+              child: Row(
+                children: [
+                  const Icon(Icons.edit, color: Color(0xFF7C4DFF), size: 16),
+                  const SizedBox(width: 6),
+                  Text(
+                    'Yorumu düzenliyorsun',
+                    style: GoogleFonts.manrope(color: const Color(0xFF7C4DFF), fontSize: 13, fontWeight: FontWeight.w600),
+                  ),
+                  const Spacer(),
+                  GestureDetector(
+                    onTap: _cancelEditing,
+                    child: Text(
+                      'İptal',
+                      style: GoogleFonts.manrope(color: Colors.white54, fontSize: 13),
+                    ),
+                  ),
+                ],
+              ),
+            ),
           Text(
             'Puanınız',
             style: GoogleFonts.manrope(color: Colors.white70, fontSize: 13),
@@ -470,7 +567,7 @@ class _MovieDetailScreenState extends State<MovieDetailScreen> {
                 child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
               )
                   : Text(
-                'Yorumu Gönder',
+                _editingReviewId != null ? 'Yorumu Güncelle' : 'Yorumu Gönder',
                 style: GoogleFonts.sora(color: Colors.white, fontWeight: FontWeight.w600),
               ),
             ),
@@ -525,6 +622,9 @@ class _MovieDetailScreenState extends State<MovieDetailScreen> {
   }
 
   Widget _buildReviewTile(Review review) {
+    final currentUserId = CurrentUser.instance.user?.id;
+    final isOwnReview = review.userId == currentUserId;
+
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(14),
@@ -573,6 +673,18 @@ class _MovieDetailScreenState extends State<MovieDetailScreen> {
                   ),
                 ],
               ),
+              if (isOwnReview) ...[
+                const SizedBox(width: 8),
+                GestureDetector(
+                  onTap: () => _startEditingReview(review),
+                  child: const Icon(Icons.edit_outlined, color: Colors.white54, size: 16),
+                ),
+                const SizedBox(width: 10),
+                GestureDetector(
+                  onTap: () => _confirmDeleteReview(review),
+                  child: const Icon(Icons.delete_outline, color: Colors.redAccent, size: 16),
+                ),
+              ],
             ],
           ),
           if (review.reviewText != null && review.reviewText!.isNotEmpty) ...[

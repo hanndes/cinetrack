@@ -50,6 +50,21 @@ class ReviewDao {
     );
   }
 
+  // Yorum güncelle (sadece kendi yorumunu güncelleyebilmesi için userId kontrolü de eklendi)
+  Future<void> updateReview(int reviewId, int userId, double rating, String? reviewText) async {
+    final db = await dbHelper.database;
+    await db.update(
+      'reviews',
+      {
+        'rating': rating,
+        'reviewText': reviewText,
+        'reviewDate': DateTime.now().toIso8601String(),
+      },
+      where: 'id = ? AND userId = ?',
+      whereArgs: [reviewId, userId],
+    );
+  }
+
   // Kullanıcının toplam kaç yorum yazdığını getir (Account/Profile istatistiği için)
   Future<int> getReviewCountForUser(int userId) async {
     final db = await dbHelper.database;
