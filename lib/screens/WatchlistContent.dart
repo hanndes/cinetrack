@@ -5,6 +5,7 @@ import '../data/list_dao.dart';
 import '../models/movie.dart';
 import '../models/movie_list.dart';
 import '../services/current_user.dart';
+import 'MovieDetailScreen.dart';
 
 class WatchlistContent extends StatefulWidget {
   const WatchlistContent({super.key});
@@ -175,32 +176,43 @@ class _WatchlistContentState extends State<WatchlistContent> with SingleTickerPr
                     ),
                     itemBuilder: (context, index) {
                       final movie = movies[index];
-                      return Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Expanded(
-                            child: ClipRRect(
-                              borderRadius: BorderRadius.circular(14),
-                              child: Image.network(
-                                movie.posterUrl,
-                                width: double.infinity,
-                                fit: BoxFit.cover,
+                      return GestureDetector(
+                        onTap: () async {
+                          await Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (context) => MovieDetailScreen(movie: movie)),
+                          );
+                          // Detay ekranından dönünce watchlist'ten çıkarılmış olabilir,
+                          // listeyi güncel tutmak için yeniden çiziyoruz
+                          if (mounted) setState(() {});
+                        },
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Expanded(
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(14),
+                                child: Image.network(
+                                  movie.posterUrl,
+                                  width: double.infinity,
+                                  fit: BoxFit.cover,
+                                ),
                               ),
                             ),
-                          ),
-                          const SizedBox(height: 8),
-                          Text(
-                            movie.title,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: GoogleFonts.manrope(color: Colors.white, fontWeight: FontWeight.w600, fontSize: 14),
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            '${movie.releaseYear} • Movie',
-                            style: GoogleFonts.manrope(color: Colors.white54, fontSize: 12),
-                          ),
-                        ],
+                            const SizedBox(height: 8),
+                            Text(
+                              movie.title,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: GoogleFonts.manrope(color: Colors.white, fontWeight: FontWeight.w600, fontSize: 14),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              '${movie.releaseYear} • Movie',
+                              style: GoogleFonts.manrope(color: Colors.white54, fontSize: 12),
+                            ),
+                          ],
+                        ),
                       );
                     },
                   ),
