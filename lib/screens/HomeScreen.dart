@@ -46,12 +46,6 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ],
         ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.search, color: Colors.white70),
-            onPressed: () {},
-          ),
-        ],
       ),
       body: IndexedStack(
         index: selectedIndex,

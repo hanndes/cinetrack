@@ -8,6 +8,7 @@ import '../data/list_dao.dart';
 import '../data/user_dao.dart';
 import '../services/current_user.dart';
 import 'LoginScreen.dart';
+import 'AccountScreen.dart';
 
 class ProfileContent extends StatefulWidget {
   const ProfileContent({super.key});
@@ -156,33 +157,52 @@ class _ProfileContentState extends State<ProfileContent> {
                   ),
                   child: Column(
                     children: [
-                      _buildSettingsTile(
-                        icon: Icons.person,
-                        iconColor: const Color(0xFF7C4DFF),
-                        title: 'Account',
-                        subtitle: 'Manage details and security',
-                        showBorder: true,
+                      GestureDetector(
+                        behavior: HitTestBehavior.opaque,
+                        onTap: () => Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => const AccountScreen()),
+                        ),
+                        child: _buildSettingsTile(
+                          icon: Icons.person,
+                          iconColor: const Color(0xFF7C4DFF),
+                          title: 'Account',
+                          subtitle: 'Manage details and security',
+                          showBorder: true,
+                        ),
                       ),
-                      _buildSettingsTile(
-                        icon: Icons.notifications,
-                        iconColor: const Color(0xFF00DCE5),
-                        title: 'Notification Settings',
-                        subtitle: 'Alerts for new releases & activity',
-                        showBorder: true,
+                      GestureDetector(
+                        behavior: HitTestBehavior.opaque,
+
+                        child: _buildSettingsTile(
+                          icon: Icons.notifications,
+                          iconColor: const Color(0xFF00DCE5),
+                          title: 'Notification Settings',
+                          subtitle: 'Alerts for new releases & activity',
+                          showBorder: true,
+                        ),
                       ),
-                      _buildSettingsTile(
-                        icon: Icons.palette,
-                        iconColor: const Color(0xFFFFDB3C),
-                        title: 'App Preferences',
-                        subtitle: 'Theme, language, and display',
-                        showBorder: true,
+                      GestureDetector(
+                        behavior: HitTestBehavior.opaque,
+
+                        child: _buildSettingsTile(
+                          icon: Icons.palette,
+                          iconColor: const Color(0xFFFFDB3C),
+                          title: 'App Preferences',
+                          subtitle: 'Theme, language, and display',
+                          showBorder: true,
+                        ),
                       ),
-                      _buildSettingsTile(
-                        icon: Icons.help,
-                        iconColor: Colors.cyanAccent,
-                        title: 'Help Center',
-                        subtitle: 'FAQs and support',
-                        showBorder: false,
+                      GestureDetector(
+                        behavior: HitTestBehavior.opaque,
+
+                        child: _buildSettingsTile(
+                          icon: Icons.help,
+                          iconColor: Colors.cyanAccent,
+                          title: 'Help Center',
+                          subtitle: 'FAQs and support',
+                          showBorder: false,
+                        ),
                       ),
                     ],
                   ),
