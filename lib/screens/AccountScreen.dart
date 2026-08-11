@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../data/user_dao.dart';
+import '../data/review_dao.dart';
+import '../data/list_dao.dart';
+import '../data/watchlist_dao.dart';
 import '../services/current_user.dart';
 import 'LoginScreen.dart';
 
@@ -13,6 +16,10 @@ class AccountScreen extends StatefulWidget {
 
 class _AccountScreenState extends State<AccountScreen> {
   final UserDao _userDao = UserDao();
+  final ReviewDao _reviewDao = ReviewDao();
+  final ListDao _listDao = ListDao();
+  final WatchlistDao _watchlistDao = WatchlistDao();
+
   late final TextEditingController _nameController;
   late final TextEditingController _emailController;
 
@@ -26,12 +33,34 @@ class _AccountScreenState extends State<AccountScreen> {
   bool _obscureNew = true;
   bool _obscureConfirm = true;
 
+  late Future<_AccountStats> _statsFuture;
+
   @override
   void initState() {
     super.initState();
     final user = CurrentUser.instance.user;
     _nameController = TextEditingController(text: user?.name ?? '');
     _emailController = TextEditingController(text: user?.email ?? '');
+    _statsFuture = _loadStats();
+  }
+
+  Future<_AccountStats> _loadStats() async {
+    final userId = CurrentUser.instance.user?.id;
+    if (userId == null) {
+      return const _AccountStats(reviewCount: 0, listCount: 0, watchlistCount: 0);
+    }
+
+    final results = await Future.wait([
+      _reviewDao.getReviewCountForUser(userId),
+      _listDao.getListCount(userId),
+      _watchlistDao.getWatchlistCount(userId),
+    ]);
+
+    return _AccountStats(
+      reviewCount: results[0],
+      listCount: results[1],
+      watchlistCount: results[2],
+    );
   }
 
   @override
@@ -236,6 +265,8 @@ class _AccountScreenState extends State<AccountScreen> {
       body: ListView(
         padding: const EdgeInsets.all(20),
         children: [
+          _buildStatsCard(),
+          const SizedBox(height: 28),
           _sectionTitle('Profil Bilgileri'),
           const SizedBox(height: 16),
           Text(
@@ -390,4 +421,92 @@ class _AccountScreenState extends State<AccountScreen> {
       ),
     );
   }
+
+  Widget _buildStatsCard() {
+    return FutureBuilder<_AccountStats>(
+      future: _statsFuture,
+      builder: (context, snapshot) {
+        final stats = snapshot.data;
+        return Container(
+          padding: const EdgeInsets.symmetric(vertical: 20),
+          decoration: BoxDecoration(
+            color: Colors.white.withOpacity(0.05),
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: Colors.white.withOpacity(0.1)),
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              _buildStatItem(
+                value: stats?.reviewCount,
+                label: 'YORUM',
+                color: const Color(0xFF00DCE5),
+              ),
+              _buildStatDivider(),
+              _buildStatItem(
+                value: stats?.listCount,
+                label: 'LİSTE',
+                color: const Color(0xFFFFDB3C),
+              ),
+              _buildStatDivider(),
+              _buildStatItem(
+                value: stats?.watchlistCount,
+                label: 'WATCHLIST',
+                color: const Color(0xFF7C4DFF),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildStatItem({required int? value, required String label, required Color color}) {
+    return Expanded(
+      child: Column(
+        children: [
+          value == null
+              ? SizedBox(
+            height: 26,
+            child: Center(
+              child: SizedBox(
+                width: 16,
+                height: 16,
+                child: CircularProgressIndicator(strokeWidth: 2, color: color),
+              ),
+            ),
+          )
+              : Text(
+            value.toString(),
+            style: GoogleFonts.sora(color: color, fontSize: 22, fontWeight: FontWeight.w700),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            label,
+            style: GoogleFonts.jetBrainsMono(color: Colors.white70, fontSize: 10, letterSpacing: 1),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStatDivider() {
+    return Container(
+      width: 1,
+      height: 32,
+      color: Colors.white24,
+    );
+  }
+}
+
+class _AccountStats {
+  final int reviewCount;
+  final int listCount;
+  final int watchlistCount;
+
+  const _AccountStats({
+    required this.reviewCount,
+    required this.listCount,
+    required this.watchlistCount,
+  });
 }

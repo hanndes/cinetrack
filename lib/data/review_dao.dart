@@ -49,4 +49,14 @@ class ReviewDao {
       whereArgs: [reviewId, userId],
     );
   }
+
+  // Kullanıcının toplam kaç yorum yazdığını getir (Account/Profile istatistiği için)
+  Future<int> getReviewCountForUser(int userId) async {
+    final db = await dbHelper.database;
+    final result = await db.rawQuery(
+      'SELECT COUNT(*) as count FROM reviews WHERE userId = ?',
+      [userId],
+    );
+    return result.first['count'] as int;
+  }
 }

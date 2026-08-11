@@ -47,4 +47,14 @@ class WatchlistDao {
     ''', [userId]);
     return maps.map((map) => Movie.fromMap(map)).toList();
   }
+
+  // Kullanıcının watchlist'inde kaç film olduğunu getir (istatistik kartı için)
+  Future<int> getWatchlistCount(int userId) async {
+    final db = await dbHelper.database;
+    final result = await db.rawQuery(
+      'SELECT COUNT(*) as count FROM watchlist WHERE userId = ?',
+      [userId],
+    );
+    return result.first['count'] as int;
+  }
 }
