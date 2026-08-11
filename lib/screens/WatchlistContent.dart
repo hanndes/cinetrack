@@ -6,6 +6,7 @@ import '../models/movie.dart';
 import '../models/movie_list.dart';
 import '../services/current_user.dart';
 import 'MovieDetailScreen.dart';
+import 'ListDetailScreen.dart';
 
 class WatchlistContent extends StatefulWidget {
   const WatchlistContent({super.key});
@@ -31,56 +32,183 @@ class _WatchlistContentState extends State<WatchlistContent> with SingleTickerPr
     super.dispose();
   }
 
+  static const List<String> _emojiOptions = [
+    '🎬', '🍿', '😂', '😱', '👻', '💕', '🔫', '🚀', '🏆', '🌙', '🎭', '⭐',
+  ];
+
+  static const List<Color> _colorOptions = [
+    Color(0xFF7C4DFF),
+    Color(0xFF00DCE5),
+    Color(0xFFFFDB3C),
+    Color(0xFFFF6B9D),
+    Color(0xFF4CAF50),
+    Color(0xFFFF7043),
+  ];
+
   void _showCreateListDialog() {
     final nameController = TextEditingController();
+    final descriptionController = TextEditingController();
+    String selectedEmoji = _emojiOptions.first;
+    Color selectedColor = _colorOptions.first;
+
     showDialog(
       context: context,
       builder: (context) {
-        return AlertDialog(
-          backgroundColor: const Color(0xFF231C30),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-          title: Text(
-            'Yeni Liste Oluştur',
-            style: GoogleFonts.sora(color: Colors.white, fontWeight: FontWeight.w700),
-          ),
-          content: TextField(
-            controller: nameController,
-            autofocus: true,
-            style: GoogleFonts.manrope(color: Colors.white),
-            decoration: InputDecoration(
-              hintText: 'Liste adı',
-              hintStyle: GoogleFonts.manrope(color: Colors.white38),
-              enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(10),
-                borderSide: const BorderSide(color: Colors.white24),
+        return StatefulBuilder(
+          builder: (context, setDialogState) {
+            return AlertDialog(
+              backgroundColor: const Color(0xFF231C30),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+              title: Text(
+                'Yeni Liste Oluştur',
+                style: GoogleFonts.sora(color: Colors.white, fontWeight: FontWeight.w700),
               ),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(10),
-                borderSide: const BorderSide(color: Color(0xFF7C4DFF)),
+              content: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Emoji önizleme + isim alanı
+                    Row(
+                      children: [
+                        Container(
+                          width: 48,
+                          height: 48,
+                          alignment: Alignment.center,
+                          decoration: BoxDecoration(
+                            color: selectedColor.withOpacity(0.15),
+                            shape: BoxShape.circle,
+                            border: Border.all(color: selectedColor),
+                          ),
+                          child: Text(selectedEmoji, style: const TextStyle(fontSize: 22)),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: TextField(
+                            controller: nameController,
+                            autofocus: true,
+                            style: GoogleFonts.manrope(color: Colors.white),
+                            decoration: InputDecoration(
+                              hintText: 'Liste adı',
+                              hintStyle: GoogleFonts.manrope(color: Colors.white38),
+                              enabledBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(10),
+                                borderSide: const BorderSide(color: Colors.white24),
+                              ),
+                              focusedBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(10),
+                                borderSide: BorderSide(color: selectedColor),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+
+                    Text('Emoji', style: GoogleFonts.manrope(color: Colors.white54, fontSize: 12)),
+                    const SizedBox(height: 8),
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: _emojiOptions.map((emoji) {
+                        final isSelected = emoji == selectedEmoji;
+                        return GestureDetector(
+                          onTap: () => setDialogState(() => selectedEmoji = emoji),
+                          child: Container(
+                            width: 38,
+                            height: 38,
+                            alignment: Alignment.center,
+                            decoration: BoxDecoration(
+                              color: isSelected ? selectedColor.withOpacity(0.2) : Colors.white.withOpacity(0.05),
+                              shape: BoxShape.circle,
+                              border: Border.all(
+                                color: isSelected ? selectedColor : Colors.white12,
+                              ),
+                            ),
+                            child: Text(emoji, style: const TextStyle(fontSize: 18)),
+                          ),
+                        );
+                      }).toList(),
+                    ),
+                    const SizedBox(height: 16),
+
+                    Text('Renk', style: GoogleFonts.manrope(color: Colors.white54, fontSize: 12)),
+                    const SizedBox(height: 8),
+                    Wrap(
+                      spacing: 10,
+                      runSpacing: 10,
+                      children: _colorOptions.map((color) {
+                        final isSelected = color.value == selectedColor.value;
+                        return GestureDetector(
+                          onTap: () => setDialogState(() => selectedColor = color),
+                          child: Container(
+                            width: 30,
+                            height: 30,
+                            decoration: BoxDecoration(
+                              color: color,
+                              shape: BoxShape.circle,
+                              border: isSelected
+                                  ? Border.all(color: Colors.white, width: 2.5)
+                                  : null,
+                            ),
+                          ),
+                        );
+                      }).toList(),
+                    ),
+                    const SizedBox(height: 16),
+
+                    Text('Açıklama (opsiyonel)', style: GoogleFonts.manrope(color: Colors.white54, fontSize: 12)),
+                    const SizedBox(height: 8),
+                    TextField(
+                      controller: descriptionController,
+                      maxLines: 2,
+                      style: GoogleFonts.manrope(color: Colors.white, fontSize: 13),
+                      decoration: InputDecoration(
+                        hintText: 'Bu liste ne hakkında?',
+                        hintStyle: GoogleFonts.manrope(color: Colors.white38, fontSize: 13),
+                        filled: true,
+                        fillColor: Colors.white.withOpacity(0.05),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10),
+                          borderSide: BorderSide.none,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: Text('İptal', style: GoogleFonts.manrope(color: Colors.white54)),
-            ),
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF7C4DFF)),
-              onPressed: () async {
-                final name = nameController.text.trim();
-                final userId = CurrentUser.instance.user?.id;
-                if (name.isEmpty || userId == null) return;
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: Text('İptal', style: GoogleFonts.manrope(color: Colors.white54)),
+                ),
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(backgroundColor: selectedColor),
+                  onPressed: () async {
+                    final name = nameController.text.trim();
+                    final userId = CurrentUser.instance.user?.id;
+                    if (name.isEmpty || userId == null) return;
 
-                await _listDao.createList(userId, name);
+                    final description = descriptionController.text.trim();
 
-                if (!context.mounted) return;
-                Navigator.pop(context);
-                setState(() {});
-              },
-              child: Text('Oluştur', style: GoogleFonts.manrope(color: Colors.white)),
-            ),
-          ],
+                    await _listDao.createList(
+                      userId,
+                      name,
+                      emoji: selectedEmoji,
+                      color: '#${selectedColor.value.toRadixString(16).substring(2)}',
+                      description: description.isEmpty ? null : description,
+                    );
+
+                    if (!context.mounted) return;
+                    Navigator.pop(context);
+                    setState(() {});
+                  },
+                  child: Text('Oluştur', style: GoogleFonts.manrope(color: Colors.white)),
+                ),
+              ],
+            );
+          },
         );
       },
     );
@@ -278,28 +406,80 @@ class _WatchlistContentState extends State<WatchlistContent> with SingleTickerPr
                     ),
                   )
                 else
-                  ...lists.map((list) => Container(
-                    margin: const EdgeInsets.only(bottom: 12),
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.05),
-                      borderRadius: BorderRadius.circular(14),
-                      border: Border.all(color: Colors.white10),
-                    ),
-                    child: Row(
-                      children: [
-                        const Icon(Icons.list_alt, color: Color(0xFF7C4DFF)),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Text(
-                            list.name,
-                            style: GoogleFonts.manrope(color: Colors.white, fontWeight: FontWeight.w600, fontSize: 15),
-                          ),
+                  ...lists.map((list) {
+                    final listColor = _parseColor(list.color) ?? const Color(0xFF7C4DFF);
+                    return GestureDetector(
+                      behavior: HitTestBehavior.opaque,
+                      onTap: () async {
+                        await Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => ListDetailScreen(list: list)),
+                        );
+                        // Liste silinmiş ya da içeriği değişmiş olabilir, yenile
+                        if (mounted) setState(() {});
+                      },
+                      child: Container(
+                        margin: const EdgeInsets.only(bottom: 12),
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.05),
+                          borderRadius: BorderRadius.circular(14),
+                          border: Border.all(color: Colors.white10),
                         ),
-                        const Icon(Icons.chevron_right, color: Colors.white38),
-                      ],
-                    ),
-                  )),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Container(
+                              width: 40,
+                              height: 40,
+                              alignment: Alignment.center,
+                              decoration: BoxDecoration(
+                                color: listColor.withOpacity(0.15),
+                                shape: BoxShape.circle,
+                                border: Border.all(color: listColor.withOpacity(0.5)),
+                              ),
+                              child: (list.emoji?.isNotEmpty ?? false)
+                                  ? Text(list.emoji!, style: const TextStyle(fontSize: 18))
+                                  : Icon(Icons.list_alt, color: listColor, size: 18),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    list.name,
+                                    style: GoogleFonts.manrope(color: Colors.white, fontWeight: FontWeight.w600, fontSize: 15),
+                                  ),
+                                  if (list.description?.isNotEmpty ?? false) ...[
+                                    const SizedBox(height: 2),
+                                    Text(
+                                      list.description!,
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: GoogleFonts.manrope(color: Colors.white54, fontSize: 12),
+                                    ),
+                                  ],
+                                  const SizedBox(height: 4),
+                                  FutureBuilder<int>(
+                                    future: _listDao.getMovieCountForList(list.id!),
+                                    builder: (context, snapshot) {
+                                      final count = snapshot.data ?? 0;
+                                      return Text(
+                                        '$count film',
+                                        style: GoogleFonts.jetBrainsMono(color: listColor, fontSize: 11),
+                                      );
+                                    },
+                                  ),
+                                ],
+                              ),
+                            ),
+                            const Icon(Icons.chevron_right, color: Colors.white38),
+                          ],
+                        ),
+                      ),
+                    );
+                  }),
                 const SizedBox(height: 20),
               ],
             ),
@@ -307,6 +487,13 @@ class _WatchlistContentState extends State<WatchlistContent> with SingleTickerPr
         );
       },
     );
+  }
+
+  Color? _parseColor(String? hex) {
+    if (hex == null || hex.isEmpty) return null;
+    final cleaned = hex.replaceFirst('#', '');
+    final value = int.tryParse('FF$cleaned', radix: 16);
+    return value != null ? Color(value) : null;
   }
 
   Widget _buildFilterChip(String label, {required bool selected}) {

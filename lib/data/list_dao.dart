@@ -6,13 +6,44 @@ class ListDao {
   final dbHelper = DatabaseHelper.instance;
 
   // Yeni liste oluştur
-  Future<int> createList(int userId, String name) async {
+  Future<int> createList(
+      int userId,
+      String name, {
+        String? emoji,
+        String? color,
+        String? description,
+      }) async {
     final db = await dbHelper.database;
     return await db.insert('lists', {
       'userId': userId,
       'name': name,
+      'emoji': emoji,
+      'color': color,
+      'description': description,
       'createdDate': DateTime.now().toIso8601String(),
     });
+  }
+
+  // Liste bilgilerini güncelle
+  Future<void> updateListDetails(
+      int listId, {
+        required String name,
+        String? emoji,
+        String? color,
+        String? description,
+      }) async {
+    final db = await dbHelper.database;
+    await db.update(
+      'lists',
+      {
+        'name': name,
+        'emoji': emoji,
+        'color': color,
+        'description': description,
+      },
+      where: 'id = ?',
+      whereArgs: [listId],
+    );
   }
 
   // Kullanıcının tüm listelerini getir
@@ -54,6 +85,16 @@ class ListDao {
       WHERE list_items.listId = ?
     ''', [listId]);
     return maps.map((map) => Movie.fromMap(map)).toList();
+  }
+
+  // Bir listede kaç film olduğunu getir (liste kartında göstermek için)
+  Future<int> getMovieCountForList(int listId) async {
+    final db = await dbHelper.database;
+    final result = await db.rawQuery(
+      'SELECT COUNT(*) as count FROM list_items WHERE listId = ?',
+      [listId],
+    );
+    return result.first['count'] as int;
   }
 
   // Kullanıcının kaç listesi var (Profile ekranı için)

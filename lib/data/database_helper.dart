@@ -134,6 +134,9 @@ class DatabaseHelper {
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         userId INTEGER NOT NULL,
         name TEXT NOT NULL,
+        emoji TEXT,
+        color TEXT,
+        description TEXT,
         createdDate TEXT,
         FOREIGN KEY (userId) REFERENCES users (id)
       )
