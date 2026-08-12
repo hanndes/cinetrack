@@ -1,5 +1,7 @@
 import 'package:cinetrack_process/screens/login_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'services/current_user.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -11,13 +13,22 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        brightness: Brightness.dark,
-        scaffoldBackgroundColor: const Color(0xFF1E1233),
+    // ChangeNotifierProvider.value: mevcut singleton'ı (CurrentUser.instance)
+    // Provider ağacına ekliyoruz. .value kullanıyoruz çünkü nesneyi burada
+    // YENİ oluşturmuyoruz, zaten var olan singleton'ı paylaşıyoruz.
+    //
+    // Bundan sonra widget ağacındaki HERHANGİ bir yerden context.watch<CurrentUser>()
+    // ile bu nesneyi dinleyebiliriz - user değiştiğinde o widget otomatik yeniden çizilir.
+    return ChangeNotifierProvider.value(
+      value: CurrentUser.instance,
+      child: MaterialApp(
+        debugShowCheckedModeBanner: false,
+        theme: ThemeData(
+          brightness: Brightness.dark,
+          scaffoldBackgroundColor: const Color(0xFF1E1233),
+        ),
+        home: const LoginScreen(),
       ),
-      home: const LoginScreen(),
     );
   }
 }
