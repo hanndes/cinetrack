@@ -1,8 +1,8 @@
-import 'package:cinetrack_process/screens/HomeScreen.dart';
+import 'package:cinetrack_process/screens/home_screen.dart';
 import 'package:flutter/material.dart';
-import 'RegisterScreen.dart';
+import 'register_screen.dart';
 import 'package:google_fonts/google_fonts.dart';
-import '../services/AuthService.dart';
+import '../services/auth_service.dart';
 import '../services/current_user.dart';
 
 class LoginScreen extends StatefulWidget {

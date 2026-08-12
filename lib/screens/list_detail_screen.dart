@@ -4,7 +4,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import '../data/list_dao.dart';
 import '../models/movie.dart';
 import '../models/movie_list.dart';
-import 'MovieDetailScreen.dart';
+import 'movie_detail_screen.dart';
 
 class ListDetailScreen extends StatefulWidget {
   final MovieList list;

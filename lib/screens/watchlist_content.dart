@@ -6,8 +6,8 @@ import '../data/list_dao.dart';
 import '../models/movie.dart';
 import '../models/movie_list.dart';
 import '../services/current_user.dart';
-import 'MovieDetailScreen.dart';
-import 'ListDetailScreen.dart';
+import 'movie_detail_screen.dart';
+import 'list_detail_screen.dart';
 
 class WatchlistContent extends StatefulWidget {
   const WatchlistContent({super.key});

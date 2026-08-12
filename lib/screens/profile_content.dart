@@ -10,8 +10,8 @@ import '../data/user_dao.dart';
 import '../data/review_dao.dart';
 import '../data/watched_dao.dart';
 import '../services/current_user.dart';
-import 'LoginScreen.dart';
-import 'AccountScreen.dart';
+import 'login_screen.dart';
+import 'account_screen.dart';
 
 class ProfileContent extends StatefulWidget {
   const ProfileContent({super.key});

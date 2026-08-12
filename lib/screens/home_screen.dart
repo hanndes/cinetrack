@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-import 'HomeContent.dart';
-import 'ProfileContent.dart';
-import 'WatchlistContent.dart';
-import 'SearchContent.dart';
+import 'home_content.dart';
+import 'profile_content.dart';
+import 'watchlist_content.dart';
+import 'search_content.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});

@@ -1,4 +1,4 @@
-import 'package:cinetrack_process/screens/LoginScreen.dart';
+import 'package:cinetrack_process/screens/login_screen.dart';
 import 'package:flutter/material.dart';
 
 void main() async {

@@ -5,7 +5,7 @@ import '../data/review_dao.dart';
 import '../data/list_dao.dart';
 import '../data/watchlist_dao.dart';
 import '../services/current_user.dart';
-import 'LoginScreen.dart';
+import 'login_screen.dart';
 
 class AccountScreen extends StatefulWidget {
   const AccountScreen({super.key});
