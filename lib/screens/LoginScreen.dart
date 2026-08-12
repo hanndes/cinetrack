@@ -196,13 +196,13 @@ class _LoginscreenState extends State<LoginScreen> {
 
                         if (user != null) {
                           CurrentUser.instance.setUser(user);
-                          if (!mounted) return;
+                          if (!context.mounted) return;
                           Navigator.push(
                             context,
                             MaterialPageRoute(builder: (context) => const HomeScreen()),
                           );
                         } else {
-                          if (!mounted) return;
+                          if (!context.mounted) return;
                           ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(
                               content: Text('E-posta veya şifre hatalı'),

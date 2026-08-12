@@ -192,7 +192,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                   _isLoading = false;
                                 });
 
-                                if (!mounted) return;
+                                if (!context.mounted) return;
 
                                 if (error != null) {
                                   ScaffoldMessenger.of(context).showSnackBar(
