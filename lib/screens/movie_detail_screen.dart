@@ -4,6 +4,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import '../models/movie.dart';
 import '../models/review.dart';
 import '../models/movie_list.dart';
+import '../data/movie_dao.dart';
 import '../data/review_dao.dart';
 import '../data/list_dao.dart';
 import '../data/watchlist_dao.dart';
@@ -11,9 +12,9 @@ import '../data/watched_dao.dart';
 import '../services/current_user.dart';
 
 class MovieDetailScreen extends StatefulWidget {
-  final Movie movie;
+  final int movieId;
 
-  const MovieDetailScreen({super.key, required this.movie});
+  const MovieDetailScreen({super.key, required this.movieId});
 
   @override
   State<MovieDetailScreen> createState() => _MovieDetailScreenState();
@@ -32,10 +33,13 @@ class _MovieDetailScreenState extends State<MovieDetailScreen> {
   bool _isWatched = false;
   int? _editingReviewId;
   late Future<List<Review>> _reviewsFuture;
+  late Future<Movie?> _movieFuture;
+  final MovieDao _movieDao = MovieDao();
 
   @override
   void initState() {
     super.initState();
+    _movieFuture = _movieDao.getMovieById(widget.movieId);
     _reviewsFuture = _loadReviews();
     _loadWatchlistStatus();
     _loadWatchedStatus();
@@ -44,14 +48,14 @@ class _MovieDetailScreenState extends State<MovieDetailScreen> {
   Future<void> _loadWatchlistStatus() async {
     final user = CurrentUser.instance.user;
     if (user?.id == null) return;
-    final result = await _watchlistDao.isInWatchlist(user!.id!, widget.movie.id!);
+    final result = await _watchlistDao.isInWatchlist(user!.id!, widget.movieId);
     if (mounted) setState(() => _isInWatchlist = result);
   }
 
   Future<void> _loadWatchedStatus() async {
     final user = CurrentUser.instance.user;
     if (user?.id == null) return;
-    final result = await _watchedDao.isWatched(user!.id!, widget.movie.id!);
+    final result = await _watchedDao.isWatched(user!.id!, widget.movieId);
     if (mounted) setState(() => _isWatched = result);
   }
 
@@ -60,7 +64,7 @@ class _MovieDetailScreenState extends State<MovieDetailScreen> {
     if (user?.id == null) return;
 
     final userId = user!.id!;
-    final movieId = widget.movie.id!;
+    final movieId = widget.movieId;
 
     if (_isWatched) {
       await _watchedDao.unmarkAsWatched(userId, movieId);
@@ -76,7 +80,7 @@ class _MovieDetailScreenState extends State<MovieDetailScreen> {
     if (user?.id == null) return;
 
     final userId = user!.id!;
-    final movieId = widget.movie.id!;
+    final movieId = widget.movieId;
 
     if (_isInWatchlist) {
       await _watchlistDao.removeFromWatchlist(userId, movieId);
@@ -88,7 +92,7 @@ class _MovieDetailScreenState extends State<MovieDetailScreen> {
   }
 
   Future<List<Review>> _loadReviews() {
-    return _reviewDao.getReviewsForMovie(widget.movie.id!);
+    return _reviewDao.getReviewsForMovie(widget.movieId);
   }
 
   Future<void> _submitReview() async {
@@ -117,7 +121,7 @@ class _MovieDetailScreenState extends State<MovieDetailScreen> {
     } else {
       await _reviewDao.addReview(
         user!.id!,
-        widget.movie.id!,
+        widget.movieId,
         _selectedRating,
         _reviewController.text.trim(),
       );
@@ -210,7 +214,7 @@ class _MovieDetailScreenState extends State<MovieDetailScreen> {
     if (user?.id == null) return;
 
     final userId = user!.id!;
-    final movieId = widget.movie.id!;
+    final movieId = widget.movieId;
 
     var lists = await _listDao.getListsForUser(userId);
     var selectedListIds = await _listDao.getListIdsContainingMovie(userId, movieId);
@@ -358,182 +362,203 @@ class _MovieDetailScreenState extends State<MovieDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final movie = widget.movie;
+    return FutureBuilder<Movie?>(
+      future: _movieFuture,
+      builder: (context, movieSnapshot) {
+        if (movieSnapshot.connectionState != ConnectionState.done) {
+          return const Scaffold(
+            backgroundColor: Color(0xFF171023),
+            body: Center(child: CircularProgressIndicator(color: Color(0xFF7C4DFF))),
+          );
+        }
 
-    return Scaffold(
-      backgroundColor: const Color(0xFF171023),
-      body: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Stack(
+        final movie = movieSnapshot.data;
+        if (movie == null) {
+          return Scaffold(
+            backgroundColor: const Color(0xFF171023),
+            appBar: AppBar(backgroundColor: const Color(0xFF171023), elevation: 0),
+            body: Center(
+              child: Text('Film bulunamadı', style: GoogleFonts.manrope(color: Colors.white70)),
+            ),
+          );
+        }
+
+        return Scaffold(
+          backgroundColor: const Color(0xFF171023),
+          body: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                CachedNetworkImage(
-                  imageUrl: movie.posterUrl,
-                  width: double.infinity,
-                  height: 420,
-                  fit: BoxFit.cover,
-                  placeholder: (context, url) => Container(
-                    height: 420,
-                    color: const Color(0xFF241A33),
-                  ),
-                  errorWidget: (context, url, error) => Container(
-                    height: 420,
-                    color: const Color(0xFF241A33),
-                    child: const Icon(Icons.movie, color: Colors.white24, size: 48),
-                  ),
-                ),
-                Container(
-                  width: double.infinity,
-                  height: 420,
-                  decoration: const BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
-                      colors: [Colors.transparent, Color(0xFF171023)],
+                Stack(
+                  children: [
+                    CachedNetworkImage(
+                      imageUrl: movie.posterUrl,
+                      width: double.infinity,
+                      height: 420,
+                      fit: BoxFit.cover,
+                      placeholder: (context, url) => Container(
+                        height: 420,
+                        color: const Color(0xFF241A33),
+                      ),
+                      errorWidget: (context, url, error) => Container(
+                        height: 420,
+                        color: const Color(0xFF241A33),
+                        child: const Icon(Icons.movie, color: Colors.white24, size: 48),
+                      ),
                     ),
-                  ),
+                    Container(
+                      width: double.infinity,
+                      height: 420,
+                      decoration: const BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                          colors: [Colors.transparent, Color(0xFF171023)],
+                        ),
+                      ),
+                    ),
+                    Positioned(
+                      top: 40,
+                      left: 12,
+                      child: IconButton(
+                        icon: const Icon(Icons.arrow_back, color: Colors.white),
+                        onPressed: () => Navigator.pop(context),
+                      ),
+                    ),
+                  ],
                 ),
-                Positioned(
-                  top: 40,
-                  left: 12,
-                  child: IconButton(
-                    icon: const Icon(Icons.arrow_back, color: Colors.white),
-                    onPressed: () => Navigator.pop(context),
+                Padding(
+                  padding: const EdgeInsets.all(20),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Expanded(
+                            child: Text(
+                              movie.title,
+                              style: GoogleFonts.sora(color: Colors.white, fontSize: 26, fontWeight: FontWeight.w800),
+                            ),
+                          ),
+                          GestureDetector(
+                            onTap: _toggleWatched,
+                            child: Container(
+                              padding: const EdgeInsets.all(8),
+                              decoration: BoxDecoration(
+                                color: _isWatched
+                                    ? Colors.greenAccent.withValues(alpha: 0.15)
+                                    : const Color(0xFF7C4DFF).withValues(alpha: 0.15),
+                                shape: BoxShape.circle,
+                              ),
+                              child: Icon(
+                                _isWatched ? Icons.check_circle : Icons.check_circle_outline,
+                                color: _isWatched ? Colors.greenAccent : const Color(0xFF7C4DFF),
+                                size: 22,
+                              ),
+                            ),
+                          ),
+                          GestureDetector(
+                            onTap: _toggleWatchlist,
+                            child: Container(
+                              margin: const EdgeInsets.only(left: 8),
+                              padding: const EdgeInsets.all(8),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFF7C4DFF).withValues(alpha: 0.15),
+                                shape: BoxShape.circle,
+                              ),
+                              child: Icon(
+                                _isInWatchlist ? Icons.bookmark : Icons.bookmark_border,
+                                color: const Color(0xFF7C4DFF),
+                                size: 22,
+                              ),
+                            ),
+                          ),
+                          GestureDetector(
+                            onTap: _openAddToListSheet,
+                            child: Container(
+                              margin: const EdgeInsets.only(left: 8),
+                              padding: const EdgeInsets.all(8),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFF7C4DFF).withValues(alpha: 0.15),
+                                shape: BoxShape.circle,
+                              ),
+                              child: const Icon(Icons.playlist_add, color: Color(0xFF7C4DFF), size: 22),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
+                      Row(
+                        children: [
+                          const Icon(Icons.star, color: Colors.amber, size: 18),
+                          const SizedBox(width: 4),
+                          Text(
+                            movie.imdbRating.toString(),
+                            style: GoogleFonts.manrope(color: Colors.white, fontWeight: FontWeight.w600),
+                          ),
+                          const SizedBox(width: 12),
+                          Text(
+                            '${movie.releaseYear} • ${movie.durationMinutes ~/ 60}h ${movie.durationMinutes % 60}m',
+                            style: GoogleFonts.manrope(color: Colors.white54, fontSize: 13),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        movie.genres.join(', '),
+                        style: GoogleFonts.manrope(color: const Color(0xFF7C4DFF), fontSize: 13),
+                      ),
+                      const SizedBox(height: 20),
+                      Text(
+                        'Yönetmen',
+                        style: GoogleFonts.sora(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w600),
+                      ),
+                      const SizedBox(height: 6),
+                      Text(
+                        movie.director,
+                        style: GoogleFonts.manrope(color: Colors.white70, fontSize: 14),
+                      ),
+                      const SizedBox(height: 20),
+                      Text(
+                        'Konu',
+                        style: GoogleFonts.sora(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w600),
+                      ),
+                      const SizedBox(height: 6),
+                      Text(
+                        movie.plot ?? 'Bilgi bulunamadı.',
+                        style: GoogleFonts.manrope(color: Colors.white70, fontSize: 14, height: 1.5),
+                      ),
+                      const SizedBox(height: 20),
+                      Text(
+                        'Oyuncular',
+                        style: GoogleFonts.sora(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w600),
+                      ),
+                      const SizedBox(height: 6),
+                      Text(
+                        movie.cast.isEmpty ? 'Bilgi bulunamadı.' : movie.cast.join(', '),
+                        style: GoogleFonts.manrope(color: Colors.white70, fontSize: 14),
+                      ),
+                      const SizedBox(height: 32),
+
+                      // ---- YORUMLAR BÖLÜMÜ ----
+                      Text(
+                        'Yorumlar',
+                        style: GoogleFonts.sora(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w700),
+                      ),
+                      const SizedBox(height: 16),
+                      _buildReviewForm(),
+                      const SizedBox(height: 24),
+                      _buildReviewsList(),
+                      const SizedBox(height: 32),
+                    ],
                   ),
                 ),
               ],
             ),
-            Padding(
-              padding: const EdgeInsets.all(20),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Expanded(
-                        child: Text(
-                          movie.title,
-                          style: GoogleFonts.sora(color: Colors.white, fontSize: 26, fontWeight: FontWeight.w800),
-                        ),
-                      ),
-                      GestureDetector(
-                        onTap: _toggleWatched,
-                        child: Container(
-                          padding: const EdgeInsets.all(8),
-                          decoration: BoxDecoration(
-                            color: _isWatched
-                                ? Colors.greenAccent.withValues(alpha: 0.15)
-                                : const Color(0xFF7C4DFF).withValues(alpha: 0.15),
-                            shape: BoxShape.circle,
-                          ),
-                          child: Icon(
-                            _isWatched ? Icons.check_circle : Icons.check_circle_outline,
-                            color: _isWatched ? Colors.greenAccent : const Color(0xFF7C4DFF),
-                            size: 22,
-                          ),
-                        ),
-                      ),
-                      GestureDetector(
-                        onTap: _toggleWatchlist,
-                        child: Container(
-                          margin: const EdgeInsets.only(left: 8),
-                          padding: const EdgeInsets.all(8),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFF7C4DFF).withValues(alpha: 0.15),
-                            shape: BoxShape.circle,
-                          ),
-                          child: Icon(
-                            _isInWatchlist ? Icons.bookmark : Icons.bookmark_border,
-                            color: const Color(0xFF7C4DFF),
-                            size: 22,
-                          ),
-                        ),
-                      ),
-                      GestureDetector(
-                        onTap: _openAddToListSheet,
-                        child: Container(
-                          margin: const EdgeInsets.only(left: 8),
-                          padding: const EdgeInsets.all(8),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFF7C4DFF).withValues(alpha: 0.15),
-                            shape: BoxShape.circle,
-                          ),
-                          child: const Icon(Icons.playlist_add, color: Color(0xFF7C4DFF), size: 22),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-                  Row(
-                    children: [
-                      const Icon(Icons.star, color: Colors.amber, size: 18),
-                      const SizedBox(width: 4),
-                      Text(
-                        movie.imdbRating.toString(),
-                        style: GoogleFonts.manrope(color: Colors.white, fontWeight: FontWeight.w600),
-                      ),
-                      const SizedBox(width: 12),
-                      Text(
-                        '${movie.releaseYear} • ${movie.durationMinutes ~/ 60}h ${movie.durationMinutes % 60}m',
-                        style: GoogleFonts.manrope(color: Colors.white54, fontSize: 13),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    movie.genres.join(', '),
-                    style: GoogleFonts.manrope(color: const Color(0xFF7C4DFF), fontSize: 13),
-                  ),
-                  const SizedBox(height: 20),
-                  Text(
-                    'Yönetmen',
-                    style: GoogleFonts.sora(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w600),
-                  ),
-                  const SizedBox(height: 6),
-                  Text(
-                    movie.director,
-                    style: GoogleFonts.manrope(color: Colors.white70, fontSize: 14),
-                  ),
-                  const SizedBox(height: 20),
-                  Text(
-                    'Konu',
-                    style: GoogleFonts.sora(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w600),
-                  ),
-                  const SizedBox(height: 6),
-                  Text(
-                    movie.plot ?? 'Bilgi bulunamadı.',
-                    style: GoogleFonts.manrope(color: Colors.white70, fontSize: 14, height: 1.5),
-                  ),
-                  const SizedBox(height: 20),
-                  Text(
-                    'Oyuncular',
-                    style: GoogleFonts.sora(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w600),
-                  ),
-                  const SizedBox(height: 6),
-                  Text(
-                    movie.cast.isEmpty ? 'Bilgi bulunamadı.' : movie.cast.join(', '),
-                    style: GoogleFonts.manrope(color: Colors.white70, fontSize: 14),
-                  ),
-                  const SizedBox(height: 32),
-
-                  // ---- YORUMLAR BÖLÜMÜ ----
-                  Text(
-                    'Yorumlar',
-                    style: GoogleFonts.sora(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w700),
-                  ),
-                  const SizedBox(height: 16),
-                  _buildReviewForm(),
-                  const SizedBox(height: 24),
-                  _buildReviewsList(),
-                  const SizedBox(height: 32),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
+          ),
+        );
+      },
     );
   }
 

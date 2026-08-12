@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../data/watchlist_dao.dart';
@@ -6,8 +7,6 @@ import '../data/list_dao.dart';
 import '../models/movie.dart';
 import '../models/movie_list.dart';
 import '../services/current_user.dart';
-import 'movie_detail_screen.dart';
-import 'list_detail_screen.dart';
 
 class WatchlistContent extends StatefulWidget {
   const WatchlistContent({super.key});
@@ -307,10 +306,7 @@ class _WatchlistContentState extends State<WatchlistContent> with SingleTickerPr
                       final movie = movies[index];
                       return GestureDetector(
                         onTap: () async {
-                          await Navigator.push(
-                            context,
-                            MaterialPageRoute(builder: (context) => MovieDetailScreen(movie: movie)),
-                          );
+                          await context.push('/movie/${movie.id}');
                           // Detay ekranından dönünce watchlist'ten çıkarılmış olabilir,
                           // listeyi güncel tutmak için yeniden çiziyoruz
                           if (mounted) setState(() {});
@@ -417,10 +413,7 @@ class _WatchlistContentState extends State<WatchlistContent> with SingleTickerPr
                     return GestureDetector(
                       behavior: HitTestBehavior.opaque,
                       onTap: () async {
-                        await Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (context) => ListDetailScreen(list: list)),
-                        );
+                        await context.push('/list/${list.id}');
                         // Liste silinmiş ya da içeriği değişmiş olabilir, yenile
                         if (mounted) setState(() {});
                       },

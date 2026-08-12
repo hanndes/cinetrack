@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../data/user_dao.dart';
 import '../data/review_dao.dart';
 import '../data/list_dao.dart';
 import '../data/watchlist_dao.dart';
 import '../services/current_user.dart';
-import 'login_screen.dart';
 
 class AccountScreen extends StatefulWidget {
   const AccountScreen({super.key});
@@ -212,12 +212,8 @@ class _AccountScreenState extends State<AccountScreen> {
     await _userDao.deleteAccount(user!.id!);
     CurrentUser.instance.clear();
 
-    if (!mounted) return;
-    Navigator.pushAndRemoveUntil(
-      context,
-      MaterialPageRoute(builder: (context) => const LoginScreen()),
-          (route) => false,
-    );
+    if (!context.mounted) return;
+    context.go('/login'); // ignore: use_build_context_synchronously
   }
 
   InputDecoration _fieldDecoration({String? label, Widget? suffixIcon}) {

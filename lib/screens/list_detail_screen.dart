@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../data/list_dao.dart';
 import '../models/movie.dart';
 import '../models/movie_list.dart';
-import 'movie_detail_screen.dart';
 
 class ListDetailScreen extends StatefulWidget {
-  final MovieList list;
+  final int listId;
 
-  const ListDetailScreen({super.key, required this.list});
+  const ListDetailScreen({super.key, required this.listId});
 
   @override
   State<ListDetailScreen> createState() => _ListDetailScreenState();
@@ -19,9 +19,12 @@ class _ListDetailScreenState extends State<ListDetailScreen> {
   final ListDao _listDao = ListDao();
   late Future<List<Movie>> _moviesFuture;
 
-  // widget.list değişmez (immutable) olduğu için, düzenleme sonrası
-  // ekranı güncel göstermek için kendi yerel kopyamızı tutuyoruz
-  late MovieList _currentList;
+  // Liste bilgisi artik id uzerinden veritabanindan cekiliyor (go_router /
+  // deep linking icin gerekli). _listFuture ilk yuklemeyi bekler,
+  // _currentList ise duzenleme sonrasi ekrani guncel gostermek icin
+  // yerel kopyayi tutar.
+  late Future<MovieList?> _listFuture;
+  MovieList? _currentList;
 
   static const List<String> _emojiOptions = [
     '🎬', '🍿', '😂', '😱', '👻', '💕', '🔫', '🚀', '🏆', '🌙', '🎭', '⭐',
@@ -39,16 +42,24 @@ class _ListDetailScreenState extends State<ListDetailScreen> {
   @override
   void initState() {
     super.initState();
-    _currentList = widget.list;
     _moviesFuture = _loadMovies();
+    _listFuture = _loadList();
+  }
+
+  Future<MovieList?> _loadList() async {
+    final list = await _listDao.getListById(widget.listId);
+    if (mounted) {
+      setState(() => _currentList = list);
+    }
+    return list;
   }
 
   Future<List<Movie>> _loadMovies() {
-    return _listDao.getMoviesInList(_currentList.id!);
+    return _listDao.getMoviesInList(widget.listId);
   }
 
   Future<void> _removeMovie(Movie movie) async {
-    await _listDao.removeMovieFromList(_currentList.id!, movie.id!);
+    await _listDao.removeMovieFromList(widget.listId, movie.id!);
     setState(() {
       _moviesFuture = _loadMovies();
     });
@@ -66,10 +77,10 @@ class _ListDetailScreenState extends State<ListDetailScreen> {
   }
 
   void _showEditListDialog() {
-    final nameController = TextEditingController(text: _currentList.name);
-    final descriptionController = TextEditingController(text: _currentList.description ?? '');
-    String selectedEmoji = _currentList.emoji ?? _emojiOptions.first;
-    Color selectedColor = _parseColor(_currentList.color) ?? _colorOptions.first;
+    final nameController = TextEditingController(text: _currentList!.name);
+    final descriptionController = TextEditingController(text: _currentList!.description ?? '');
+    String selectedEmoji = _currentList!.emoji ?? _emojiOptions.first;
+    Color selectedColor = _parseColor(_currentList!.color) ?? _colorOptions.first;
 
     showDialog(
       context: context,
@@ -212,7 +223,7 @@ class _ListDetailScreenState extends State<ListDetailScreen> {
                     final colorHex = _colorToHex(selectedColor);
 
                     await _listDao.updateListDetails(
-                      _currentList.id!,
+                      widget.listId,
                       name: name,
                       emoji: selectedEmoji,
                       color: colorHex,
@@ -224,13 +235,13 @@ class _ListDetailScreenState extends State<ListDetailScreen> {
 
                     setState(() {
                       _currentList = MovieList(
-                        id: _currentList.id,
-                        userId: _currentList.userId,
+                        id: widget.listId,
+                        userId: _currentList!.userId,
                         name: name,
                         emoji: selectedEmoji,
                         color: colorHex,
                         description: description.isEmpty ? null : description,
-                        createdDate: _currentList.createdDate,
+                        createdDate: _currentList!.createdDate,
                       );
                     });
                   },
@@ -255,7 +266,7 @@ class _ListDetailScreenState extends State<ListDetailScreen> {
             style: GoogleFonts.sora(color: Colors.white, fontWeight: FontWeight.w700),
           ),
           content: Text(
-            '"${_currentList.name}" listesini silmek istediğine emin misin? Bu işlem geri alınamaz.',
+            '"${_currentList!.name}" listesini silmek istediğine emin misin? Bu işlem geri alınamaz.',
             style: GoogleFonts.manrope(color: Colors.white70, fontSize: 14),
           ),
           actions: [
@@ -277,7 +288,7 @@ class _ListDetailScreenState extends State<ListDetailScreen> {
 
     if (confirmed != true) return;
 
-    await _listDao.deleteList(_currentList.id!);
+    await _listDao.deleteList(widget.listId);
 
     if (!mounted) return;
     // Silindiğini önceki ekrana bildirmek için true döndürerek geri dönüyoruz
@@ -286,163 +297,183 @@ class _ListDetailScreenState extends State<ListDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final listColor = _parseColor(_currentList.color) ?? const Color(0xFF7C4DFF);
+    return FutureBuilder<MovieList?>(
+      future: _listFuture,
+      builder: (context, listSnapshot) {
+        if (listSnapshot.connectionState != ConnectionState.done) {
+          return const Scaffold(
+            backgroundColor: Color(0xFF171023),
+            body: Center(child: CircularProgressIndicator(color: Color(0xFF7C4DFF))),
+          );
+        }
 
-    return Scaffold(
-      backgroundColor: const Color(0xFF171023),
-      appBar: AppBar(
-        backgroundColor: const Color(0xFF171023),
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
-          onPressed: () => Navigator.pop(context),
-        ),
-        title: Row(
-          children: [
-            if (_currentList.emoji?.isNotEmpty ?? false) ...[
-              Text(_currentList.emoji!, style: const TextStyle(fontSize: 20)),
-              const SizedBox(width: 8),
-            ],
-            Flexible(
-              child: Text(
-                _currentList.name,
-                style: GoogleFonts.sora(color: Colors.white, fontWeight: FontWeight.w700),
-                overflow: TextOverflow.ellipsis,
-              ),
+        final list = listSnapshot.data;
+        if (list == null) {
+          return Scaffold(
+            backgroundColor: const Color(0xFF171023),
+            appBar: AppBar(backgroundColor: const Color(0xFF171023), elevation: 0),
+            body: Center(
+              child: Text('Liste bulunamadı', style: GoogleFonts.manrope(color: Colors.white70)),
             ),
-          ],
-        ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.edit_outlined, color: Colors.white70),
-            onPressed: _showEditListDialog,
-          ),
-          IconButton(
-            icon: const Icon(Icons.delete_outline, color: Colors.redAccent),
-            onPressed: _confirmDeleteList,
-          ),
-        ],
-      ),
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          if (_currentList.description?.isNotEmpty ?? false)
-            Padding(
-              padding: const EdgeInsets.fromLTRB(20, 0, 20, 16),
-              child: Container(
-                padding: const EdgeInsets.all(14),
-                decoration: BoxDecoration(
-                  color: listColor.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: listColor.withValues(alpha: 0.3)),
-                ),
-                child: Text(
-                  _currentList.description!,
-                  style: GoogleFonts.manrope(color: Colors.white70, fontSize: 13, height: 1.4),
-                ),
-              ),
+          );
+        }
+
+        final listColor = _parseColor(list.color) ?? const Color(0xFF7C4DFF);
+
+        return Scaffold(
+          backgroundColor: const Color(0xFF171023),
+          appBar: AppBar(
+            backgroundColor: const Color(0xFF171023),
+            elevation: 0,
+            leading: IconButton(
+              icon: const Icon(Icons.arrow_back, color: Colors.white),
+              onPressed: () => Navigator.pop(context),
             ),
-          Expanded(
-            child: FutureBuilder<List<Movie>>(
-              future: _moviesFuture,
-              builder: (context, snapshot) {
-                if (!snapshot.hasData) {
-                  return const Center(
-                    child: CircularProgressIndicator(color: Color(0xFF7C4DFF)),
-                  );
-                }
-
-                final movies = snapshot.data!;
-
-                if (movies.isEmpty) {
-                  return Center(
-                    child: Text(
-                      'Bu listede henüz film yok',
-                      style: GoogleFonts.manrope(color: Colors.white54, fontSize: 14),
-                    ),
-                  );
-                }
-
-                return GridView.builder(
-                  padding: const EdgeInsets.all(20),
-                  itemCount: movies.length,
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 2,
-                    mainAxisSpacing: 16,
-                    crossAxisSpacing: 16,
-                    childAspectRatio: 0.6,
+            title: Row(
+              children: [
+                if (list.emoji?.isNotEmpty ?? false) ...[
+                  Text(list.emoji!, style: const TextStyle(fontSize: 20)),
+                  const SizedBox(width: 8),
+                ],
+                Flexible(
+                  child: Text(
+                    list.name,
+                    style: GoogleFonts.sora(color: Colors.white, fontWeight: FontWeight.w700),
+                    overflow: TextOverflow.ellipsis,
                   ),
-                  itemBuilder: (context, index) {
-                    final movie = movies[index];
-                    return GestureDetector(
-                      onTap: () async {
-                        await Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (context) => MovieDetailScreen(movie: movie)),
-                        );
-                        if (mounted) setState(() => _moviesFuture = _loadMovies());
-                      },
-                      onLongPress: () => _removeMovie(movie),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Expanded(
-                            child: Stack(
-                              children: [
-                                ClipRRect(
-                                  borderRadius: BorderRadius.circular(14),
-                                  child: CachedNetworkImage(
-                                    imageUrl: movie.posterUrl,
-                                    width: double.infinity,
-                                    height: double.infinity,
-                                    fit: BoxFit.cover,
-                                    placeholder: (context, url) => Container(color: const Color(0xFF241A33)),
-                                    errorWidget: (context, url, error) => Container(
-                                      color: const Color(0xFF241A33),
-                                      child: const Icon(Icons.movie, color: Colors.white24),
-                                    ),
-                                  ),
-                                ),
-                                Positioned(
-                                  top: 6,
-                                  right: 6,
-                                  child: GestureDetector(
-                                    onTap: () => _removeMovie(movie),
-                                    child: Container(
-                                      padding: const EdgeInsets.all(5),
-                                      decoration: BoxDecoration(
-                                        color: Colors.black.withValues(alpha: 0.55),
-                                        shape: BoxShape.circle,
-                                      ),
-                                      child: const Icon(Icons.close, color: Colors.white, size: 14),
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-                          Text(
-                            movie.title,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: GoogleFonts.manrope(color: Colors.white, fontWeight: FontWeight.w600, fontSize: 14),
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            '${movie.releaseYear}',
-                            style: GoogleFonts.manrope(color: Colors.white54, fontSize: 12),
-                          ),
-                        ],
+                ),
+              ],
+            ),
+            actions: [
+              IconButton(
+                icon: const Icon(Icons.edit_outlined, color: Colors.white70),
+                onPressed: _showEditListDialog,
+              ),
+              IconButton(
+                icon: const Icon(Icons.delete_outline, color: Colors.redAccent),
+                onPressed: _confirmDeleteList,
+              ),
+            ],
+          ),
+          body: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              if (list.description?.isNotEmpty ?? false)
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 0, 20, 16),
+                  child: Container(
+                    padding: const EdgeInsets.all(14),
+                    decoration: BoxDecoration(
+                      color: listColor.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: listColor.withValues(alpha: 0.3)),
+                    ),
+                    child: Text(
+                      list.description!,
+                      style: GoogleFonts.manrope(color: Colors.white70, fontSize: 13, height: 1.4),
+                    ),
+                  ),
+                ),
+              Expanded(
+                child: FutureBuilder<List<Movie>>(
+                  future: _moviesFuture,
+                  builder: (context, snapshot) {
+                    if (!snapshot.hasData) {
+                      return const Center(
+                        child: CircularProgressIndicator(color: Color(0xFF7C4DFF)),
+                      );
+                    }
+
+                    final movies = snapshot.data!;
+
+                    if (movies.isEmpty) {
+                      return Center(
+                        child: Text(
+                          'Bu listede henüz film yok',
+                          style: GoogleFonts.manrope(color: Colors.white54, fontSize: 14),
+                        ),
+                      );
+                    }
+
+                    return GridView.builder(
+                      padding: const EdgeInsets.all(20),
+                      itemCount: movies.length,
+                      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 2,
+                        mainAxisSpacing: 16,
+                        crossAxisSpacing: 16,
+                        childAspectRatio: 0.6,
                       ),
+                      itemBuilder: (context, index) {
+                        final movie = movies[index];
+                        return GestureDetector(
+                          onTap: () async {
+                            await context.push('/movie/${movie.id}');
+                            if (mounted) setState(() => _moviesFuture = _loadMovies());
+                          },
+                          onLongPress: () => _removeMovie(movie),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Expanded(
+                                child: Stack(
+                                  children: [
+                                    ClipRRect(
+                                      borderRadius: BorderRadius.circular(14),
+                                      child: CachedNetworkImage(
+                                        imageUrl: movie.posterUrl,
+                                        width: double.infinity,
+                                        height: double.infinity,
+                                        fit: BoxFit.cover,
+                                        placeholder: (context, url) => Container(color: const Color(0xFF241A33)),
+                                        errorWidget: (context, url, error) => Container(
+                                          color: const Color(0xFF241A33),
+                                          child: const Icon(Icons.movie, color: Colors.white24),
+                                        ),
+                                      ),
+                                    ),
+                                    Positioned(
+                                      top: 6,
+                                      right: 6,
+                                      child: GestureDetector(
+                                        onTap: () => _removeMovie(movie),
+                                        child: Container(
+                                          padding: const EdgeInsets.all(5),
+                                          decoration: BoxDecoration(
+                                            color: Colors.black.withValues(alpha: 0.55),
+                                            shape: BoxShape.circle,
+                                          ),
+                                          child: const Icon(Icons.close, color: Colors.white, size: 14),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              const SizedBox(height: 8),
+                              Text(
+                                movie.title,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: GoogleFonts.manrope(color: Colors.white, fontWeight: FontWeight.w600, fontSize: 14),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                '${movie.releaseYear}',
+                                style: GoogleFonts.manrope(color: Colors.white54, fontSize: 12),
+                              ),
+                            ],
+                          ),
+                        );
+                      },
                     );
                   },
-                );
-              },
-            ),
+                ),
+              ),
+            ],
           ),
-        ],
-      ),
+        );
+      },
     );
   }
 }

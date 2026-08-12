@@ -1,6 +1,5 @@
-import 'package:cinetrack_process/screens/home_screen.dart';
 import 'package:flutter/material.dart';
-import 'register_screen.dart';
+import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../services/auth_service.dart';
 import '../services/current_user.dart';
@@ -197,10 +196,7 @@ class _LoginscreenState extends State<LoginScreen> {
                         if (user != null) {
                           CurrentUser.instance.setUser(user);
                           if (!context.mounted) return;
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(builder: (context) => const HomeScreen()),
-                          );
+                          context.go('/home');
                         } else {
                           if (!context.mounted) return;
                           ScaffoldMessenger.of(context).showSnackBar(
@@ -267,10 +263,7 @@ class _LoginscreenState extends State<LoginScreen> {
                       ),
                       TextButton(
                         onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(builder: (context) => const RegisterScreen()),
-                          );
+                          context.push('/register');
                         },
                         style: TextButton.styleFrom(padding: EdgeInsets.zero),
                         child: Text(

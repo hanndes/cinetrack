@@ -3,10 +3,10 @@ import '../data/watchlist_dao.dart';
 import '../models/movie.dart';
 import '../services/current_user.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'movie_detail_screen.dart';
 
 class HomeContent extends StatefulWidget {
   const HomeContent({super.key});
@@ -48,10 +48,7 @@ class _HomeContentState extends State<HomeContent> {
             children: [
               GestureDetector(
                 onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => MovieDetailScreen(movie: movies[0])),
-                  );
+                  context.push('/movie/${movies[0].id}');
                 },
                 child: SizedBox(
                   height: 480,
@@ -224,10 +221,7 @@ class _HomeContentState extends State<HomeContent> {
                     final movie = movies[index];
                     return GestureDetector(
                       onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (context) => MovieDetailScreen(movie: movie)),
-                        );
+                        context.push('/movie/${movie.id}');
                       },
                       child: Container(
                         width: 140,
@@ -293,10 +287,7 @@ class _HomeContentState extends State<HomeContent> {
                 padding: const EdgeInsets.symmetric(horizontal: 20),
                 child: GestureDetector(
                   onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => MovieDetailScreen(movie: movies[1])),
-                    );
+                    context.push('/movie/${movies[1].id}');
                   },
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(16),

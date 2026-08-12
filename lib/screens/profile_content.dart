@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:image_picker/image_picker.dart';
@@ -11,8 +12,6 @@ import '../data/user_dao.dart';
 import '../data/review_dao.dart';
 import '../data/watched_dao.dart';
 import '../services/current_user.dart';
-import 'login_screen.dart';
-import 'account_screen.dart';
 
 class ProfileContent extends StatefulWidget {
   const ProfileContent({super.key});
@@ -175,10 +174,7 @@ class _ProfileContentState extends State<ProfileContent> {
                     children: [
                       GestureDetector(
                         behavior: HitTestBehavior.opaque,
-                        onTap: () => Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (context) => const AccountScreen()),
-                        ),
+                        onTap: () => context.push('/account'),
                         child: _buildSettingsTile(
                           icon: Icons.person,
                           iconColor: const Color(0xFF7C4DFF),
@@ -230,11 +226,7 @@ class _ProfileContentState extends State<ProfileContent> {
           GestureDetector(
             onTap: () {
               CurrentUser.instance.clear();
-              Navigator.pushAndRemoveUntil(
-                context,
-                MaterialPageRoute(builder: (context) => const LoginScreen()),
-                    (route) => false,
-              );
+              context.go('/login');
             },
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 14),

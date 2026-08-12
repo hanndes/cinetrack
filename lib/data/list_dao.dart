@@ -46,6 +46,19 @@ class ListDao {
     );
   }
 
+  // Tek bir listeyi id ile getir (deep linking / go_router icin gerekli:
+  // link uzerinden gelen listId'den listenin tum bilgisini cekiyoruz)
+  Future<MovieList?> getListById(int listId) async {
+    final db = await dbHelper.database;
+    final maps = await db.query(
+      'lists',
+      where: 'id = ?',
+      whereArgs: [listId],
+    );
+    if (maps.isEmpty) return null;
+    return MovieList.fromMap(maps.first);
+  }
+
   // Kullanıcının tüm listelerini getir
   Future<List<MovieList>> getListsForUser(int userId) async {
     final db = await dbHelper.database;
