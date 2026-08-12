@@ -1,6 +1,5 @@
 import 'package:cinetrack_process/screens/LoginScreen.dart';
 import 'package:flutter/material.dart';
-import 'data/movie_dao.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
