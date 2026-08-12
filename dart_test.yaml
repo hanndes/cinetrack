@@ -1,0 +1,9 @@
+# DAO testleri (test/data/) gerçek bir SQLite dosyasını (sqflite_common_ffi)
+# paylaşıyor. flutter test varsayılan olarak test dosyalarını paralel
+# çalıştırdığı için aynı anda birden fazla dosya aynı cinetrack.db'yi
+# kilitlemeye çalışıyor ve "database is locked" hatası alınıyor.
+#
+# concurrency: 1 ile tüm test dosyaları sırayla (bir bitmeden diğeri
+# başlamadan) çalıştırılır. Tek dosya çalıştırırken zaten sorun yoktu,
+# bu ayar sadece `flutter test` ile hepsini birden çalıştırırken gerekiyor.
+concurrency: 1
