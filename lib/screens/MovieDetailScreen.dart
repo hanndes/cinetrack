@@ -424,8 +424,8 @@ class _MovieDetailScreenState extends State<MovieDetailScreen> {
                           padding: const EdgeInsets.all(8),
                           decoration: BoxDecoration(
                             color: _isWatched
-                                ? Colors.greenAccent.withOpacity(0.15)
-                                : const Color(0xFF7C4DFF).withOpacity(0.15),
+                                ? Colors.greenAccent.withValues(alpha: 0.15)
+                                : const Color(0xFF7C4DFF).withValues(alpha: 0.15),
                             shape: BoxShape.circle,
                           ),
                           child: Icon(
@@ -441,7 +441,7 @@ class _MovieDetailScreenState extends State<MovieDetailScreen> {
                           margin: const EdgeInsets.only(left: 8),
                           padding: const EdgeInsets.all(8),
                           decoration: BoxDecoration(
-                            color: const Color(0xFF7C4DFF).withOpacity(0.15),
+                            color: const Color(0xFF7C4DFF).withValues(alpha: 0.15),
                             shape: BoxShape.circle,
                           ),
                           child: Icon(
@@ -457,7 +457,7 @@ class _MovieDetailScreenState extends State<MovieDetailScreen> {
                           margin: const EdgeInsets.only(left: 8),
                           padding: const EdgeInsets.all(8),
                           decoration: BoxDecoration(
-                            color: const Color(0xFF7C4DFF).withOpacity(0.15),
+                            color: const Color(0xFF7C4DFF).withValues(alpha: 0.15),
                             shape: BoxShape.circle,
                           ),
                           child: const Icon(Icons.playlist_add, color: Color(0xFF7C4DFF), size: 22),
@@ -541,9 +541,9 @@ class _MovieDetailScreenState extends State<MovieDetailScreen> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.05),
+        color: Colors.white.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.white.withOpacity(0.1)),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -597,7 +597,7 @@ class _MovieDetailScreenState extends State<MovieDetailScreen> {
               hintText: 'Bu film hakkında ne düşünüyorsun?',
               hintStyle: GoogleFonts.manrope(color: Colors.white38),
               filled: true,
-              fillColor: Colors.white.withOpacity(0.05),
+              fillColor: Colors.white.withValues(alpha: 0.05),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
                 borderSide: BorderSide.none,
@@ -683,9 +683,9 @@ class _MovieDetailScreenState extends State<MovieDetailScreen> {
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.03),
+        color: Colors.white.withValues(alpha: 0.03),
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: Colors.white.withOpacity(0.08)),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -694,7 +694,7 @@ class _MovieDetailScreenState extends State<MovieDetailScreen> {
             children: [
               CircleAvatar(
                 radius: 14,
-                backgroundColor: const Color(0xFF7C4DFF).withOpacity(0.3),
+                backgroundColor: const Color(0xFF7C4DFF).withValues(alpha: 0.3),
                 child: Text(
                   (review.userName?.isNotEmpty ?? false) ? review.userName![0].toUpperCase() : '?',
                   style: GoogleFonts.sora(color: Colors.white, fontWeight: FontWeight.w700, fontSize: 12),

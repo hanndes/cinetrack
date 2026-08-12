@@ -28,7 +28,7 @@ class _HomeScreenState extends State<HomeScreen> {
     return Scaffold(
       backgroundColor: const Color(0xFF171023),
       appBar: AppBar(
-        backgroundColor: const Color(0xFF171023).withOpacity(0.8),
+        backgroundColor: const Color(0xFF171023).withValues(alpha: 0.8),
         elevation: 0,
         centerTitle: false,
         title: Row(
@@ -53,7 +53,7 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
-          color: const Color(0xFF231C30).withOpacity(0.9),
+          color: const Color(0xFF231C30).withValues(alpha: 0.9),
           borderRadius: const BorderRadius.only(
             topLeft: Radius.circular(20),
             topRight: Radius.circular(20),

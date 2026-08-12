@@ -62,7 +62,7 @@ class _ListDetailScreenState extends State<ListDetailScreen> {
   }
 
   String _colorToHex(Color color) {
-    return '#${color.value.toRadixString(16).substring(2)}';
+    return '#${color.toARGB32().toRadixString(16).substring(2)}';
   }
 
   void _showEditListDialog() {
@@ -95,7 +95,7 @@ class _ListDetailScreenState extends State<ListDetailScreen> {
                           height: 48,
                           alignment: Alignment.center,
                           decoration: BoxDecoration(
-                            color: selectedColor.withOpacity(0.15),
+                            color: selectedColor.withValues(alpha: 0.15),
                             shape: BoxShape.circle,
                             border: Border.all(color: selectedColor),
                           ),
@@ -139,7 +139,7 @@ class _ListDetailScreenState extends State<ListDetailScreen> {
                             height: 38,
                             alignment: Alignment.center,
                             decoration: BoxDecoration(
-                              color: isSelected ? selectedColor.withOpacity(0.2) : Colors.white.withOpacity(0.05),
+                              color: isSelected ? selectedColor.withValues(alpha: 0.2) : Colors.white.withValues(alpha: 0.05),
                               shape: BoxShape.circle,
                               border: Border.all(
                                 color: isSelected ? selectedColor : Colors.white12,
@@ -158,7 +158,7 @@ class _ListDetailScreenState extends State<ListDetailScreen> {
                       spacing: 10,
                       runSpacing: 10,
                       children: _colorOptions.map((color) {
-                        final isSelected = color.value == selectedColor.value;
+                        final isSelected = color.toARGB32() == selectedColor.toARGB32();
                         return GestureDetector(
                           onTap: () => setDialogState(() => selectedColor = color),
                           child: Container(
@@ -187,7 +187,7 @@ class _ListDetailScreenState extends State<ListDetailScreen> {
                         hintText: 'Bu liste ne hakkında?',
                         hintStyle: GoogleFonts.manrope(color: Colors.white38, fontSize: 13),
                         filled: true,
-                        fillColor: Colors.white.withOpacity(0.05),
+                        fillColor: Colors.white.withValues(alpha: 0.05),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(10),
                           borderSide: BorderSide.none,
@@ -332,9 +332,9 @@ class _ListDetailScreenState extends State<ListDetailScreen> {
               child: Container(
                 padding: const EdgeInsets.all(14),
                 decoration: BoxDecoration(
-                  color: listColor.withOpacity(0.1),
+                  color: listColor.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: listColor.withOpacity(0.3)),
+                  border: Border.all(color: listColor.withValues(alpha: 0.3)),
                 ),
                 child: Text(
                   _currentList.description!,
@@ -411,7 +411,7 @@ class _ListDetailScreenState extends State<ListDetailScreen> {
                                     child: Container(
                                       padding: const EdgeInsets.all(5),
                                       decoration: BoxDecoration(
-                                        color: Colors.black.withOpacity(0.55),
+                                        color: Colors.black.withValues(alpha: 0.55),
                                         shape: BoxShape.circle,
                                       ),
                                       child: const Icon(Icons.close, color: Colors.white, size: 14),

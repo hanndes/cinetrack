@@ -65,7 +65,7 @@ class _LoginscreenState extends State<LoginScreen> {
               width: double.infinity,
               padding: const EdgeInsets.all(24),
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.05),
+                color: Colors.white.withValues(alpha: 0.05),
                 borderRadius: BorderRadius.circular(20),
                 border: Border.all(color: Colors.white10),
               ),
@@ -94,7 +94,7 @@ class _LoginscreenState extends State<LoginScreen> {
                       hintStyle: GoogleFonts.sora(color: Colors.white38),
                       prefixIcon: const Icon(Icons.email_outlined, color: Colors.white54),
                       filled: true,
-                      fillColor: Colors.white.withOpacity(0.05),
+                      fillColor: Colors.white.withValues(alpha: 0.05),
                       enabledBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
                         borderSide: const BorderSide(color: Colors.white24),
@@ -126,7 +126,7 @@ class _LoginscreenState extends State<LoginScreen> {
                         },
                       ),
                       filled: true,
-                      fillColor: Colors.white.withOpacity(0.05),
+                      fillColor: Colors.white.withValues(alpha: 0.05),
                       enabledBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
                         borderSide: const BorderSide(color: Colors.white24),

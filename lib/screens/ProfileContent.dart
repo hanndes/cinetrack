@@ -77,7 +77,7 @@ class _ProfileContentState extends State<ProfileContent> {
                     border: Border.all(color: const Color(0xFF7C4DFF), width: 2),
                     boxShadow: [
                       BoxShadow(
-                        color: const Color(0xFF7C4DFF).withOpacity(0.4),
+                        color: const Color(0xFF7C4DFF).withValues(alpha: 0.4),
                         blurRadius: 20,
                         spreadRadius: 2,
                       ),
@@ -162,9 +162,9 @@ class _ProfileContentState extends State<ProfileContent> {
                 const SizedBox(height: 16),
                 Container(
                   decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.05),
+                    color: Colors.white.withValues(alpha: 0.05),
                     borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: Colors.white.withOpacity(0.1)),
+                    border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
                   ),
                   child: Column(
                     children: [
@@ -234,9 +234,9 @@ class _ProfileContentState extends State<ProfileContent> {
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 14),
               decoration: BoxDecoration(
-                color: Colors.redAccent.withOpacity(0.1),
+                color: Colors.redAccent.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(30),
-                border: Border.all(color: Colors.redAccent.withOpacity(0.3)),
+                border: Border.all(color: Colors.redAccent.withValues(alpha: 0.3)),
               ),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
@@ -307,7 +307,7 @@ Widget _buildSettingsTile({
           width: 40,
           height: 40,
           decoration: BoxDecoration(
-            color: iconColor.withOpacity(0.15),
+            color: iconColor.withValues(alpha: 0.15),
             shape: BoxShape.circle,
           ),
           child: Icon(icon, color: iconColor, size: 20),

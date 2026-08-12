@@ -77,7 +77,7 @@ class _WatchlistContentState extends State<WatchlistContent> with SingleTickerPr
                           height: 48,
                           alignment: Alignment.center,
                           decoration: BoxDecoration(
-                            color: selectedColor.withOpacity(0.15),
+                            color: selectedColor.withValues(alpha: 0.15),
                             shape: BoxShape.circle,
                             border: Border.all(color: selectedColor),
                           ),
@@ -121,7 +121,7 @@ class _WatchlistContentState extends State<WatchlistContent> with SingleTickerPr
                             height: 38,
                             alignment: Alignment.center,
                             decoration: BoxDecoration(
-                              color: isSelected ? selectedColor.withOpacity(0.2) : Colors.white.withOpacity(0.05),
+                              color: isSelected ? selectedColor.withValues(alpha: 0.2) : Colors.white.withValues(alpha: 0.05),
                               shape: BoxShape.circle,
                               border: Border.all(
                                 color: isSelected ? selectedColor : Colors.white12,
@@ -140,7 +140,7 @@ class _WatchlistContentState extends State<WatchlistContent> with SingleTickerPr
                       spacing: 10,
                       runSpacing: 10,
                       children: _colorOptions.map((color) {
-                        final isSelected = color.value == selectedColor.value;
+                        final isSelected = color.toARGB32() == selectedColor.toARGB32();
                         return GestureDetector(
                           onTap: () => setDialogState(() => selectedColor = color),
                           child: Container(
@@ -169,7 +169,7 @@ class _WatchlistContentState extends State<WatchlistContent> with SingleTickerPr
                         hintText: 'Bu liste ne hakkında?',
                         hintStyle: GoogleFonts.manrope(color: Colors.white38, fontSize: 13),
                         filled: true,
-                        fillColor: Colors.white.withOpacity(0.05),
+                        fillColor: Colors.white.withValues(alpha: 0.05),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(10),
                           borderSide: BorderSide.none,
@@ -197,7 +197,7 @@ class _WatchlistContentState extends State<WatchlistContent> with SingleTickerPr
                       userId,
                       name,
                       emoji: selectedEmoji,
-                      color: '#${selectedColor.value.toRadixString(16).substring(2)}',
+                      color: '#${selectedColor.toARGB32().toRadixString(16).substring(2)}',
                       description: description.isEmpty ? null : description,
                     );
 
@@ -383,9 +383,9 @@ class _WatchlistContentState extends State<WatchlistContent> with SingleTickerPr
                   child: Container(
                     padding: const EdgeInsets.symmetric(vertical: 14),
                     decoration: BoxDecoration(
-                      color: const Color(0xFF7C4DFF).withOpacity(0.15),
+                      color: const Color(0xFF7C4DFF).withValues(alpha: 0.15),
                       borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: const Color(0xFF7C4DFF).withOpacity(0.4)),
+                      border: Border.all(color: const Color(0xFF7C4DFF).withValues(alpha: 0.4)),
                     ),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -428,7 +428,7 @@ class _WatchlistContentState extends State<WatchlistContent> with SingleTickerPr
                         margin: const EdgeInsets.only(bottom: 12),
                         padding: const EdgeInsets.all(16),
                         decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.05),
+                          color: Colors.white.withValues(alpha: 0.05),
                           borderRadius: BorderRadius.circular(14),
                           border: Border.all(color: Colors.white10),
                         ),
@@ -440,9 +440,9 @@ class _WatchlistContentState extends State<WatchlistContent> with SingleTickerPr
                               height: 40,
                               alignment: Alignment.center,
                               decoration: BoxDecoration(
-                                color: listColor.withOpacity(0.15),
+                                color: listColor.withValues(alpha: 0.15),
                                 shape: BoxShape.circle,
-                                border: Border.all(color: listColor.withOpacity(0.5)),
+                                border: Border.all(color: listColor.withValues(alpha: 0.5)),
                               ),
                               child: (list.emoji?.isNotEmpty ?? false)
                                   ? Text(list.emoji!, style: const TextStyle(fontSize: 18))
@@ -507,7 +507,7 @@ class _WatchlistContentState extends State<WatchlistContent> with SingleTickerPr
       margin: const EdgeInsets.only(right: 10),
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       decoration: BoxDecoration(
-        color: selected ? const Color(0xFF7C4DFF).withOpacity(0.2) : Colors.white.withOpacity(0.05),
+        color: selected ? const Color(0xFF7C4DFF).withValues(alpha: 0.2) : Colors.white.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
           color: selected ? const Color(0xFF7C4DFF) : Colors.white24,

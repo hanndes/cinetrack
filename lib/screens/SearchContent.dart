@@ -1,6 +1,6 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import '../data/movie_dao.dart';
 import '../models/movie.dart';
 
@@ -50,7 +50,7 @@ class _SearchContentState extends State<SearchContent> {
             const SizedBox(height: 16),
             Container(
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.05),
+                color: Colors.white.withValues(alpha: 0.05),
                 borderRadius: BorderRadius.circular(14),
                 border: Border.all(color: Colors.white24),
               ),
@@ -127,9 +127,9 @@ class _SearchContentState extends State<SearchContent> {
                             imageUrl: movie.posterUrl,
                             width: double.infinity,
                             fit: BoxFit.cover,
-                            placeholder: (context, url) => Container(color: const Color(0xFF231A33)),
+                            placeholder: (context, url) => Container(color: const Color(0xFF241A33)),
                             errorWidget: (context, url, error) => Container(
-                              color: const Color(0xFF231A33),
+                              color: const Color(0xFF241A33),
                               child: const Icon(Icons.movie, color: Colors.white24),
                             ),
                           ),

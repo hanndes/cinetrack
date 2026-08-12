@@ -90,7 +90,7 @@ class _HomeContentState extends State<HomeContent> {
                               Container(
                                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                                 decoration: BoxDecoration(
-                                  color: Colors.white.withOpacity(0.1),
+                                  color: Colors.white.withValues(alpha: 0.1),
                                   borderRadius: BorderRadius.circular(20),
                                   border: Border.all(color: Colors.white24),
                                 ),
@@ -171,7 +171,7 @@ class _HomeContentState extends State<HomeContent> {
                     const SizedBox(width: 12),
                     Container(
                       decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.1),
+                        color: Colors.white.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(12),
                         border: Border.all(color: Colors.white24),
                       ),
@@ -336,9 +336,9 @@ class _HomeContentState extends State<HomeContent> {
                                 Container(
                                   padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                                   decoration: BoxDecoration(
-                                    color: Colors.amber.withOpacity(0.15),
+                                    color: Colors.amber.withValues(alpha: 0.15),
                                     borderRadius: BorderRadius.circular(6),
-                                    border: Border.all(color: Colors.amber.withOpacity(0.4)),
+                                    border: Border.all(color: Colors.amber.withValues(alpha: 0.4)),
                                   ),
                                   child: Text(
                                     '98% Match',

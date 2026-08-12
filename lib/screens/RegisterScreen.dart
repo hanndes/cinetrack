@@ -54,7 +54,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       width: double.infinity,
                       padding: const EdgeInsets.fromLTRB(24, 24, 24, 32),
                       decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.05),
+                        color: Colors.white.withValues(alpha: 0.05),
                         borderRadius: BorderRadius.circular(20),
                         border: Border.all(color: Colors.white10),
                       ),
@@ -300,7 +300,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
       prefixIcon: Icon(icon, color: Colors.white54),
       suffixIcon: suffixIcon,
       filled: true,
-      fillColor: Colors.white.withOpacity(0.05),
+      fillColor: Colors.white.withValues(alpha: 0.05),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
         borderSide: const BorderSide(color: Colors.white24),
