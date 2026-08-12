@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import '../models/movie.dart';
 import '../models/review.dart';
 import '../models/movie_list.dart';
@@ -367,11 +368,20 @@ class _MovieDetailScreenState extends State<MovieDetailScreen> {
           children: [
             Stack(
               children: [
-                Image.network(
-                  movie.posterUrl,
+                CachedNetworkImage(
+                  imageUrl: movie.posterUrl,
                   width: double.infinity,
                   height: 420,
                   fit: BoxFit.cover,
+                  placeholder: (context, url) => Container(
+                    height: 420,
+                    color: const Color(0xFF241A33),
+                  ),
+                  errorWidget: (context, url, error) => Container(
+                    height: 420,
+                    color: const Color(0xFF241A33),
+                    child: const Icon(Icons.movie, color: Colors.white24, size: 48),
+                  ),
                 ),
                 Container(
                   width: double.infinity,
