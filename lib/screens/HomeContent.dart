@@ -3,6 +3,7 @@ import '../data/watchlist_dao.dart';
 import '../models/movie.dart';
 import '../services/current_user.dart';
 import 'package:flutter/material.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'MovieDetailScreen.dart';
@@ -57,9 +58,14 @@ class _HomeContentState extends State<HomeContent> {
                   child: Stack(
                     fit: StackFit.expand,
                     children: [
-                      Image.network(
-                        movies[0].posterUrl,
+                      CachedNetworkImage(
+                        imageUrl: movies[0].posterUrl,
                         fit: BoxFit.cover,
+                        placeholder: (context, url) => Container(color: const Color(0xFF241A33)),
+                        errorWidget: (context, url, error) => Container(
+                          color: const Color(0xFF241A33),
+                          child: const Icon(Icons.movie, color: Colors.white24),
+                        ),
                       ),
                       Container(
                         decoration: const BoxDecoration(
@@ -231,11 +237,22 @@ class _HomeContentState extends State<HomeContent> {
                           children: [
                             ClipRRect(
                               borderRadius: BorderRadius.circular(14),
-                              child: Image.network(
-                                movie.posterUrl,
+                              child: CachedNetworkImage(
+                                imageUrl: movie.posterUrl,
                                 height: 190,
                                 width: 140,
                                 fit: BoxFit.cover,
+                                placeholder: (context, url) => Container(
+                                  height: 190,
+                                  width: 140,
+                                  color: const Color(0xFF241A33),
+                                ),
+                                errorWidget: (context, url, error) => Container(
+                                  height: 190,
+                                  width: 140,
+                                  color: const Color(0xFF241A33),
+                                  child: const Icon(Icons.movie, color: Colors.white24),
+                                ),
                               ),
                             ),
                             const SizedBox(height: 8),
@@ -288,9 +305,14 @@ class _HomeContentState extends State<HomeContent> {
                       child: Stack(
                         fit: StackFit.expand,
                         children: [
-                          Image.network(
-                            movies[1].posterUrl,
+                          CachedNetworkImage(
+                            imageUrl: movies[1].posterUrl,
                             fit: BoxFit.cover,
+                            placeholder: (context, url) => Container(color: const Color(0xFF241A33)),
+                            errorWidget: (context, url, error) => Container(
+                              color: const Color(0xFF241A33),
+                              child: const Icon(Icons.movie, color: Colors.white24),
+                            ),
                           ),
                           Container(
                             decoration: const BoxDecoration(
