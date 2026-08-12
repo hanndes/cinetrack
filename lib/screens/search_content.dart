@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:go_router/go_router.dart';
 import '../data/movie_dao.dart';
 import '../models/movie.dart';
 
@@ -117,43 +118,47 @@ class _SearchContentState extends State<SearchContent> {
                 ),
                 itemBuilder: (context, index) {
                   final movie = _results[index];
-                  return Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Expanded(
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(14),
-                          child: CachedNetworkImage(
-                            imageUrl: movie.posterUrl,
-                            width: double.infinity,
-                            fit: BoxFit.cover,
-                            placeholder: (context, url) => Container(color: const Color(0xFF241A33)),
-                            errorWidget: (context, url, error) => Container(
-                              color: const Color(0xFF241A33),
-                              child: const Icon(Icons.movie, color: Colors.white24),
+                  return GestureDetector(
+                    behavior: HitTestBehavior.opaque,
+                    onTap: () => context.push('/movie/${movie.id}'),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(14),
+                            child: CachedNetworkImage(
+                              imageUrl: movie.posterUrl,
+                              width: double.infinity,
+                              fit: BoxFit.cover,
+                              placeholder: (context, url) => Container(color: const Color(0xFF241A33)),
+                              errorWidget: (context, url, error) => Container(
+                                color: const Color(0xFF241A33),
+                                child: const Icon(Icons.movie, color: Colors.white24),
+                              ),
                             ),
                           ),
                         ),
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        movie.title,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: GoogleFonts.manrope(color: Colors.white, fontWeight: FontWeight.w600, fontSize: 14),
-                      ),
-                      const SizedBox(height: 4),
-                      Row(
-                        children: [
-                          const Icon(Icons.star, color: Colors.amber, size: 12),
-                          const SizedBox(width: 4),
-                          Text(
-                            movie.imdbRating.toString(),
-                            style: GoogleFonts.manrope(color: Colors.white70, fontSize: 12),
-                          ),
-                        ],
-                      ),
-                    ],
+                        const SizedBox(height: 8),
+                        Text(
+                          movie.title,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: GoogleFonts.manrope(color: Colors.white, fontWeight: FontWeight.w600, fontSize: 14),
+                        ),
+                        const SizedBox(height: 4),
+                        Row(
+                          children: [
+                            const Icon(Icons.star, color: Colors.amber, size: 12),
+                            const SizedBox(width: 4),
+                            Text(
+                              movie.imdbRating.toString(),
+                              style: GoogleFonts.manrope(color: Colors.white70, fontSize: 12),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
                   );
                 },
               ),
