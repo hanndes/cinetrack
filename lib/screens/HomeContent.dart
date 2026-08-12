@@ -53,7 +53,7 @@ class _HomeContentState extends State<HomeContent> {
                     MaterialPageRoute(builder: (context) => MovieDetailScreen(movie: movies[0])),
                   );
                 },
-                child: Container(
+                child: SizedBox(
                   height: 480,
                   child: Stack(
                     fit: StackFit.expand,
@@ -300,7 +300,7 @@ class _HomeContentState extends State<HomeContent> {
                   },
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(16),
-                    child: Container(
+                    child: SizedBox(
                       height: 220,
                       child: Stack(
                         fit: StackFit.expand,
