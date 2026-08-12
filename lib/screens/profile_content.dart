@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:image_picker/image_picker.dart';
@@ -59,7 +60,11 @@ class _ProfileContentState extends State<ProfileContent> {
 
   @override
   Widget build(BuildContext context) {
-    final imagePath = CurrentUser.instance.user?.profileImageUrl;
+    // context.watch<CurrentUser>(): bu widget'i CurrentUser'i dinleyen listeye ekliyor.
+    // CurrentUser icinde notifyListeners() cagrildigi her an (ornegin AccountScreen'de
+    // isim degistirildiginde), bu build() metodu otomatik olarak yeniden calisiyor.
+    final currentUser = context.watch<CurrentUser>();
+    final imagePath = currentUser.user?.profileImageUrl;
     final hasLocalImage = imagePath != null && File(imagePath).existsSync();
 
     return SingleChildScrollView(
@@ -118,21 +123,21 @@ class _ProfileContentState extends State<ProfileContent> {
           ),
           const SizedBox(height: 16),
           Text(
-            CurrentUser.instance.user?.name ?? 'Misafir',
+            currentUser.user?.name ?? 'Misafir',
             style: GoogleFonts.sora(color: Colors.white, fontSize: 26, fontWeight: FontWeight.w800),
           ),
           const SizedBox(height: 4),
           Text(
-            CurrentUser.instance.user?.email ?? '',
+            currentUser.user?.email ?? '',
             style: GoogleFonts.manrope(color: Colors.white70, fontSize: 15),
           ),
           const SizedBox(height: 20),
           FutureBuilder<List<int>>(
-            future: CurrentUser.instance.user?.id != null
+            future: currentUser.user?.id != null
                 ? Future.wait([
-              _watchedDao.getWatchedCount(CurrentUser.instance.user!.id!),
-              _reviewDao.getReviewCountForUser(CurrentUser.instance.user!.id!),
-              _listDao.getListCount(CurrentUser.instance.user!.id!),
+              _watchedDao.getWatchedCount(currentUser.user!.id!),
+              _reviewDao.getReviewCountForUser(currentUser.user!.id!),
+              _listDao.getListCount(currentUser.user!.id!),
             ])
                 : Future.value([0, 0, 0]),
             builder: (context, snapshot) {
