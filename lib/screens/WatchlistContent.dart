@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import '../data/watchlist_dao.dart';
 import '../data/list_dao.dart';
 import '../models/movie.dart';
@@ -320,10 +321,15 @@ class _WatchlistContentState extends State<WatchlistContent> with SingleTickerPr
                             Expanded(
                               child: ClipRRect(
                                 borderRadius: BorderRadius.circular(14),
-                                child: Image.network(
-                                  movie.posterUrl,
+                                child: CachedNetworkImage(
+                                  imageUrl: movie.posterUrl,
                                   width: double.infinity,
                                   fit: BoxFit.cover,
+                                  placeholder: (context, url) => Container(color: const Color(0xFF241A33)),
+                                  errorWidget: (context, url, error) => Container(
+                                    color: const Color(0xFF241A33),
+                                    child: const Icon(Icons.movie, color: Colors.white24),
+                                  ),
                                 ),
                               ),
                             ),
