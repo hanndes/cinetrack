@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as p;
@@ -88,9 +89,11 @@ class _ProfileContentState extends State<ProfileContent> {
                       File(imagePath),
                       fit: BoxFit.cover,
                     )
-                        : Image.network(
-                      'https://lh3.googleusercontent.com/aida-public/AB6AXuBcw_2ZcWdUXREuzusR9UBLTTbyXJvqKaSEwNAbarTC_GVdw--VFuOvTo0Vpu2R5MKMUc9eg5GKn-Mx12stQ2JWXgBadG-q7Y8YWzbtaEfx6u-0P9_JtPNKXxOn61JsilLhnkfQKHx9IE4msmC6PCayx0HtsBWPjdzj-2RpT58VgZyatGkPeYg4WjUzJS-ydYB85tgY8-ciI7pXWkxti05-IEbTXaYUZIPQQ7L237l7XSUw3lgYBzJN',
+                        : CachedNetworkImage(
+                      imageUrl: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBcw_2ZcWdUXREuzusR9UBLTTbyXJvqKaSEwNAbarTC_GVdw--VFuOvTo0Vpu2R5MKMUc9eg5GKn-Mx12stQ2JWXgBadG-q7Y8YWzbtaEfx6u-0P9_JtPNKXxOn61JsilLhnkfQKHx9IE4msmC6PCayx0HtsBWPjdzj-2RpT58VgZyatGkPeYg4WjUzJS-ydYB85tgY8-ciI7pXWkxti05-IEbTXaYUZIPQQ7L237l7XSUw3lgYBzJN',
                       fit: BoxFit.cover,
+                      placeholder: (context, url) => Container(color: const Color(0xFF241A33)),
+                      errorWidget: (context, url, error) => const Icon(Icons.person, color: Colors.white24, size: 40),
                     ),
                   ),
                 ),
