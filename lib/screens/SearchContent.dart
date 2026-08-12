@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../data/movie_dao.dart';
@@ -122,10 +123,15 @@ class _SearchContentState extends State<SearchContent> {
                       Expanded(
                         child: ClipRRect(
                           borderRadius: BorderRadius.circular(14),
-                          child: Image.network(
-                            movie.posterUrl,
+                          child: CachedNetworkImage(
+                            imageUrl: movie.posterUrl,
                             width: double.infinity,
                             fit: BoxFit.cover,
+                            placeholder: (context, url) => Container(color: const Color(0xFF231A33)),
+                            errorWidget: (context, url, error) => Container(
+                              color: const Color(0xFF231A33),
+                              child: const Icon(Icons.movie, color: Colors.white24),
+                            ),
                           ),
                         ),
                       ),
