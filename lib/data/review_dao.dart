@@ -1,77 +1,65 @@
+import 'package:supabase_flutter/supabase_flutter.dart' hide User;
 import '../models/review.dart';
-import 'database_helper.dart';
 
 class ReviewDao {
-  final dbHelper = DatabaseHelper.instance;
+  final supabase = Supabase.instance.client;
 
   // Yorum ekle
   Future<int> addReview(int userId, int movieId, double rating, String? reviewText) async {
-    final db = await dbHelper.database;
-    return await db.insert('reviews', {
-      'userId': userId,
-      'movieId': movieId,
+    final response = await supabase.from('reviews').insert({
+      'user_id': userId,
+      'movie_id': movieId,
       'rating': rating,
-      'reviewText': reviewText,
-      'reviewDate': DateTime.now().toIso8601String(),
-    });
+      'review_text': reviewText,
+      'review_date': DateTime.now().toIso8601String(),
+    }).select('id').single();
+    return response['id'] as int;
   }
 
   // Bir filme ait tüm yorumları getir (en yeni üstte, kullanıcı adıyla birlikte)
   Future<List<Review>> getReviewsForMovie(int movieId) async {
-    final db = await dbHelper.database;
-    final maps = await db.rawQuery('''
-      SELECT reviews.*, users.name as userName
-      FROM reviews
-      INNER JOIN users ON reviews.userId = users.id
-      WHERE reviews.movieId = ?
-      ORDER BY reviews.reviewDate DESC
-    ''', [movieId]);
-    return maps.map((map) => Review.fromMap(map)).toList();
+    final maps = await supabase
+        .from('reviews')
+        .select('*, users(name)')
+        .eq('movie_id', movieId)
+        .order('review_date', ascending: false);
+
+    return maps.map((map) {
+      final flat = Map<String, dynamic>.from(map);
+      flat['userName'] = map['users']?['name'];
+      return Review.fromMap(flat);
+    }).toList();
   }
 
   // Bir filmin ortalama puanı
   Future<double?> getAverageRating(int movieId) async {
-    final db = await dbHelper.database;
-    final result = await db.rawQuery(
-      'SELECT AVG(rating) as avgRating FROM reviews WHERE movieId = ?',
-      [movieId],
-    );
-    final avg = result.first['avgRating'];
-    return avg == null ? null : (avg as num).toDouble();
+    final maps = await supabase.from('reviews').select('rating').eq('movie_id', movieId);
+    if (maps.isEmpty) return null;
+    final total = maps.fold<double>(0, (sum, row) => sum + (row['rating'] as num).toDouble());
+    return total / maps.length;
   }
 
   // Yorum sil (sadece kendi yorumunu silebilmesi için userId kontrolü de eklendi)
   Future<void> deleteReview(int reviewId, int userId) async {
-    final db = await dbHelper.database;
-    await db.delete(
-      'reviews',
-      where: 'id = ? AND userId = ?',
-      whereArgs: [reviewId, userId],
-    );
+    await supabase.from('reviews').delete().eq('id', reviewId).eq('user_id', userId);
   }
 
   // Yorum güncelle (sadece kendi yorumunu güncelleyebilmesi için userId kontrolü de eklendi)
   Future<void> updateReview(int reviewId, int userId, double rating, String? reviewText) async {
-    final db = await dbHelper.database;
-    await db.update(
-      'reviews',
-      {
-        'rating': rating,
-        'reviewText': reviewText,
-        'reviewDate': DateTime.now().toIso8601String(),
-      },
-      where: 'id = ? AND userId = ?',
-      whereArgs: [reviewId, userId],
-    );
+    await supabase.from('reviews').update({
+      'rating': rating,
+      'review_text': reviewText,
+      'review_date': DateTime.now().toIso8601String(),
+    }).eq('id', reviewId).eq('user_id', userId);
   }
 
   // Kullanıcının toplam kaç yorum yazdığını getir (Account/Profile istatistiği için)
   Future<int> getReviewCountForUser(int userId) async {
-    final db = await dbHelper.database;
-    final result = await db.rawQuery(
-      'SELECT COUNT(*) as count FROM reviews WHERE userId = ?',
-      [userId],
-    );
-    return result.first['count'] as int;
+    final response = await supabase
+        .from('reviews')
+        .select('id')
+        .eq('user_id', userId)
+        .count(CountOption.exact);
+    return response.count;
   }
 }

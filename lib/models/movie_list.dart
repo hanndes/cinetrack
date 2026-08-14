@@ -20,24 +20,24 @@ class MovieList {
   Map<String, dynamic> toMap() {
     return {
       'id': id,
-      'userId': userId,
+      'user_id': userId,
       'name': name,
       'emoji': emoji,
       'color': color,
       'description': description,
-      'createdDate': createdDate,
+      'created_date': createdDate,
     };
   }
 
   factory MovieList.fromMap(Map<String, dynamic> map) {
     return MovieList(
       id: map['id'],
-      userId: map['userId'],
+      userId: map['user_id'],
       name: map['name'],
       emoji: map['emoji'],
       color: map['color'],
       description: map['description'],
-      createdDate: map['createdDate'],
+      createdDate: map['created_date'],
     );
   }
 }

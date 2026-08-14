@@ -22,22 +22,22 @@ class Review {
   Map<String, dynamic> toMap() {
     return {
       'id': id,
-      'userId': userId,
-      'movieId': movieId,
+      'user_id': userId,
+      'movie_id': movieId,
       'rating': rating,
-      'reviewText': reviewText,
-      'reviewDate': reviewDate,
+      'review_text': reviewText,
+      'review_date': reviewDate,
     };
   }
 
   factory Review.fromMap(Map<String, dynamic> map) {
     return Review(
       id: map['id'],
-      userId: map['userId'],
-      movieId: map['movieId'],
+      userId: map['user_id'],
+      movieId: map['movie_id'],
       rating: (map['rating'] as num).toDouble(),
-      reviewText: map['reviewText'],
-      reviewDate: map['reviewDate'],
+      reviewText: map['review_text'],
+      reviewDate: map['review_date'],
       userName: map['userName'],
     );
   }

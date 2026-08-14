@@ -34,8 +34,8 @@ class User {
       'id': id,
       'name': name,
       'email': email,
-      'passwordHash': passwordHash,
-      'profileImageUrl': profileImageUrl,
+      'password_hash': passwordHash,
+      'profile_image_url': profileImageUrl,
     };
   }
 
@@ -44,8 +44,8 @@ class User {
       id: map['id'],
       name: map['name'],
       email: map['email'],
-      passwordHash: map['passwordHash'],
-      profileImageUrl: map['profileImageUrl'],
+      passwordHash: map['password_hash'],
+      profileImageUrl: map['profile_image_url'],
     );
   }
 }

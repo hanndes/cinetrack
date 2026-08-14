@@ -1,9 +1,9 @@
+import 'package:supabase_flutter/supabase_flutter.dart' hide User;
 import '../models/movie.dart';
 import '../models/movie_list.dart';
-import 'database_helper.dart';
 
 class ListDao {
-  final dbHelper = DatabaseHelper.instance;
+  final supabase = Supabase.instance.client;
 
   // Yeni liste oluştur
   Future<int> createList(
@@ -13,15 +13,15 @@ class ListDao {
         String? color,
         String? description,
       }) async {
-    final db = await dbHelper.database;
-    return await db.insert('lists', {
-      'userId': userId,
+    final response = await supabase.from('lists').insert({
+      'user_id': userId,
       'name': name,
       'emoji': emoji,
       'color': color,
       'description': description,
-      'createdDate': DateTime.now().toIso8601String(),
-    });
+      'created_date': DateTime.now().toIso8601String(),
+    }).select('id').single();
+    return response['id'] as int;
   }
 
   // Liste bilgilerini güncelle
@@ -32,111 +32,86 @@ class ListDao {
         String? color,
         String? description,
       }) async {
-    final db = await dbHelper.database;
-    await db.update(
-      'lists',
-      {
-        'name': name,
-        'emoji': emoji,
-        'color': color,
-        'description': description,
-      },
-      where: 'id = ?',
-      whereArgs: [listId],
-    );
+    await supabase.from('lists').update({
+      'name': name,
+      'emoji': emoji,
+      'color': color,
+      'description': description,
+    }).eq('id', listId);
   }
 
-  // Tek bir listeyi id ile getir (deep linking / go_router icin gerekli:
-  // link uzerinden gelen listId'den listenin tum bilgisini cekiyoruz)
+  // Tek bir listeyi id ile getir
   Future<MovieList?> getListById(int listId) async {
-    final db = await dbHelper.database;
-    final maps = await db.query(
-      'lists',
-      where: 'id = ?',
-      whereArgs: [listId],
-    );
+    final maps = await supabase.from('lists').select().eq('id', listId);
     if (maps.isEmpty) return null;
     return MovieList.fromMap(maps.first);
   }
 
   // Kullanıcının tüm listelerini getir
   Future<List<MovieList>> getListsForUser(int userId) async {
-    final db = await dbHelper.database;
-    final maps = await db.query(
-      'lists',
-      where: 'userId = ?',
-      whereArgs: [userId],
-    );
+    final maps = await supabase.from('lists').select().eq('user_id', userId);
     return maps.map((map) => MovieList.fromMap(map)).toList();
   }
 
   // Listeye film ekle
   Future<void> addMovieToList(int listId, int movieId) async {
-    final db = await dbHelper.database;
-    await db.insert('list_items', {
-      'listId': listId,
-      'movieId': movieId,
+    await supabase.from('list_items').insert({
+      'list_id': listId,
+      'movie_id': movieId,
     });
   }
 
   // Listeden film çıkar
   Future<void> removeMovieFromList(int listId, int movieId) async {
-    final db = await dbHelper.database;
-    await db.delete(
-      'list_items',
-      where: 'listId = ? AND movieId = ?',
-      whereArgs: [listId, movieId],
-    );
+    await supabase
+        .from('list_items')
+        .delete()
+        .eq('list_id', listId)
+        .eq('movie_id', movieId);
   }
 
   // Bir listedeki filmleri getir
   Future<List<Movie>> getMoviesInList(int listId) async {
-    final db = await dbHelper.database;
-    final maps = await db.rawQuery('''
-      SELECT movies.* FROM movies
-      INNER JOIN list_items ON movies.id = list_items.movieId
-      WHERE list_items.listId = ?
-    ''', [listId]);
-    return maps.map((map) => Movie.fromMap(map)).toList();
+    final maps = await supabase
+        .from('list_items')
+        .select('movies(*)')
+        .eq('list_id', listId);
+    return maps.map((map) => Movie.fromMap(map['movies'])).toList();
   }
 
-  // Bir listede kaç film olduğunu getir (liste kartında göstermek için)
+  // Bir listede kaç film olduğunu getir
   Future<int> getMovieCountForList(int listId) async {
-    final db = await dbHelper.database;
-    final result = await db.rawQuery(
-      'SELECT COUNT(*) as count FROM list_items WHERE listId = ?',
-      [listId],
-    );
-    return result.first['count'] as int;
+    final response = await supabase
+        .from('list_items')
+        .select('id')
+        .eq('list_id', listId)
+        .count(CountOption.exact);
+    return response.count;
   }
 
-  // Kullanıcının kaç listesi var (Profile ekranı için)
+  // Kullanıcının kaç listesi var
   Future<int> getListCount(int userId) async {
-    final db = await dbHelper.database;
-    final result = await db.rawQuery(
-      'SELECT COUNT(*) as count FROM lists WHERE userId = ?',
-      [userId],
-    );
-    return result.first['count'] as int;
+    final response = await supabase
+        .from('lists')
+        .select('id')
+        .eq('user_id', userId)
+        .count(CountOption.exact);
+    return response.count;
   }
 
   // Listeyi sil
   Future<void> deleteList(int listId) async {
-    final db = await dbHelper.database;
-    await db.delete('list_items', where: 'listId = ?', whereArgs: [listId]);
-    await db.delete('lists', where: 'id = ?', whereArgs: [listId]);
+    await supabase.from('list_items').delete().eq('list_id', listId);
+    await supabase.from('lists').delete().eq('id', listId);
   }
 
   // Bir filmin, kullanıcının hangi listelerinde olduğunu getir
-  // (Listeye Ekle bottom sheet'inde hangi checkbox'ların işaretli
-  // gösterileceğini belirlemek için kullanılır)
   Future<Set<int>> getListIdsContainingMovie(int userId, int movieId) async {
-    final db = await dbHelper.database;
-    final maps = await db.rawQuery('''
-      SELECT lists.id FROM lists
-      INNER JOIN list_items ON lists.id = list_items.listId
-      WHERE lists.userId = ? AND list_items.movieId = ?
-    ''', [userId, movieId]);
-    return maps.map((map) => map['id'] as int).toSet();
+    final maps = await supabase
+        .from('list_items')
+        .select('list_id, lists!inner(user_id)')
+        .eq('movie_id', movieId)
+        .eq('lists.user_id', userId);
+    return maps.map((map) => map['list_id'] as int).toSet();
   }
 }

@@ -29,12 +29,12 @@ class Movie {
     return {
       'id': id,
       'title': title,
-      'posterUrl': posterUrl,
+      'poster_url': posterUrl,
       'director': director,
-      'imdbRating': imdbRating,
+      'imdb_rating': imdbRating,
       'badge': badge,
-      'durationMinutes': durationMinutes,
-      'releaseYear': releaseYear,
+      'duration_minutes': durationMinutes,
+      'release_year': releaseYear,
       'plot': plot,
     };
   }
@@ -43,12 +43,12 @@ class Movie {
     return Movie(
       id: map['id'],
       title: map['title'],
-      posterUrl: map['posterUrl'],
+      posterUrl: map['poster_url'],
       director: map['director'],
-      imdbRating: map['imdbRating'],
+      imdbRating: (map['imdb_rating'] as num).toDouble(),
       badge: map['badge'],
-      durationMinutes: map['durationMinutes'],
-      releaseYear: map['releaseYear'],
+      durationMinutes: map['duration_minutes'],
+      releaseYear: map['release_year'],
       plot: map['plot'],
       genres: genres ?? const [],
       cast: cast ?? const [],

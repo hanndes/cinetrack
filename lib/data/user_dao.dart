@@ -1,42 +1,26 @@
 import 'package:bcrypt/bcrypt.dart';
+import 'package:supabase_flutter/supabase_flutter.dart' hide User;
 import '../models/user.dart';
-import 'database_helper.dart';
 
 class UserDao {
-  final dbHelper = DatabaseHelper.instance;
+  final supabase = Supabase.instance.client;
 
   // Kayıt ol
   Future<User> register(String name, String email, String password) async {
-    final db = await dbHelper.database;
-
     final hashedPassword = BCrypt.hashpw(password, BCrypt.gensalt());
 
-    final user = User(
-      name: name,
-      email: email,
-      passwordHash: hashedPassword,
-    );
+    final response = await supabase.from('users').insert({
+      'name': name,
+      'email': email,
+      'password_hash': hashedPassword,
+    }).select().single();
 
-    final id = await db.insert('users', user.toMap()..remove('id'));
-
-    return User(
-      id: id,
-      name: name,
-      email: email,
-      passwordHash: hashedPassword,
-    );
+    return User.fromMap(response);
   }
 
   // Email ile kullanıcı bul
   Future<User?> getUserByEmail(String email) async {
-    final db = await dbHelper.database;
-
-    final maps = await db.query(
-      'users',
-      where: 'email = ?',
-      whereArgs: [email],
-    );
-
+    final maps = await supabase.from('users').select().eq('email', email);
     if (maps.isNotEmpty) {
       return User.fromMap(maps.first);
     }
@@ -62,34 +46,25 @@ class UserDao {
 
   // Profil fotoğrafı yolunu güncelle
   Future<void> updateProfileImage(int userId, String imagePath) async {
-    final db = await dbHelper.database;
-
-    await db.update(
-      'users',
-      {'profileImageUrl': imagePath},
-      where: 'id = ?',
-      whereArgs: [userId],
-    );
+    await supabase
+        .from('users')
+        .update({'profile_image_url': imagePath})
+        .eq('id', userId);
   }
 
   // İsim ve email güncelle
   Future<void> updateProfile(int userId, String name, String email) async {
-    final db = await dbHelper.database;
-
-    await db.update(
-      'users',
-      {'name': name, 'email': email},
-      where: 'id = ?',
-      whereArgs: [userId],
-    );
+    await supabase
+        .from('users')
+        .update({'name': name, 'email': email})
+        .eq('id', userId);
   }
 
   // Şifre değiştir (mevcut şifreyi doğrulayarak)
   // Döner: true -> başarılı, false -> mevcut şifre yanlış
-  Future<bool> changePassword(int userId, String currentPassword, String newPassword) async {
-    final db = await dbHelper.database;
-
-    final maps = await db.query('users', where: 'id = ?', whereArgs: [userId]);
+  Future<bool> changePassword(
+      int userId, String currentPassword, String newPassword) async {
+    final maps = await supabase.from('users').select().eq('id', userId);
     if (maps.isEmpty) return false;
 
     final user = User.fromMap(maps.first);
@@ -97,30 +72,18 @@ class UserDao {
     if (!isCurrentCorrect) return false;
 
     final newHash = BCrypt.hashpw(newPassword, BCrypt.gensalt());
-    await db.update(
-      'users',
-      {'passwordHash': newHash},
-      where: 'id = ?',
-      whereArgs: [userId],
-    );
+    await supabase
+        .from('users')
+        .update({'password_hash': newHash})
+        .eq('id', userId);
     return true;
   }
 
   // Hesabı sil (ilişkili tüm verilerle birlikte)
+  // Not: tablolarda "on delete cascade" tanımlı olduğu için users'tan
+  // silmek yeterli, ilişkili favorites/watchlist/watched/reviews/lists/
+  // list_items kayıtları otomatik silinir.
   Future<void> deleteAccount(int userId) async {
-    final db = await dbHelper.database;
-    await db.delete('reviews', where: 'userId = ?', whereArgs: [userId]);
-    await db.delete('watchlist', where: 'userId = ?', whereArgs: [userId]);
-    await db.delete('watched', where: 'userId = ?', whereArgs: [userId]);
-    await db.delete('favorites', where: 'userId = ?', whereArgs: [userId]);
-
-    // Kullanıcının listelerindeki list_items'ları da temizle
-    final lists = await db.query('lists', where: 'userId = ?', whereArgs: [userId]);
-    for (final list in lists) {
-      await db.delete('list_items', where: 'listId = ?', whereArgs: [list['id']]);
-    }
-    await db.delete('lists', where: 'userId = ?', whereArgs: [userId]);
-
-    await db.delete('users', where: 'id = ?', whereArgs: [userId]);
+    await supabase.from('users').delete().eq('id', userId);
   }
 }
